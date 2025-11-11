@@ -1,0 +1,50 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vostra-ingress
+  namespace: vostra
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - vostra.ai
+    - www.vostra.ai
+    secretName: vostra-tls
+  rules:
+  - host: vostra.ai
+    http:
+      paths:
+      - path: /vostra-invoice
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-invoice
+            port:
+              number: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-landing
+            port:
+              number: 80
+  - host: www.vostra.ai
+    http:
+      paths:
+      - path: /vostra-invoice
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-invoice
+            port:
+              number: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-landing
+            port:
+              number: 80

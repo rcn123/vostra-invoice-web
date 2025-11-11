@@ -4,7 +4,7 @@ import DemoPage from './pages/DemoPage';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/vostra-invoice">
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/demo" element={<DemoPage />} />

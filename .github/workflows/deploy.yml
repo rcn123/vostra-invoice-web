@@ -1,4 +1,4 @@
-name: Deploy to Hetzner
+name: Deploy to Hetzner K8s
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Hetzner
+      - name: Deploy to Hetzner Kubernetes
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HETZNER_HOST }}
@@ -21,8 +21,37 @@ jobs:
           key: ${{ secrets.HETZNER_SSH_KEY }}
           script: |
             cd /var/www/vostra-invoice-web
+
+            # Pull latest code
             git pull origin main
-            docker-compose down
-            docker-compose build --no-cache
-            docker-compose up -d
+
+            # Build Docker images
+            docker build -t vostra-landing:v1 ./landing
+            docker build -t vostra-invoice-frontend:v1 ./frontend
+
+            # Import images to k3s
+            docker save vostra-landing:v1 | sudo k3s ctr images import -
+            docker save vostra-invoice-frontend:v1 | sudo k3s ctr images import -
+
+            # Apply Kubernetes manifests (in case they changed)
+            kubectl apply -f k8s/namespace.yaml
+            kubectl apply -f k8s/landing-deployment.yaml
+            kubectl apply -f k8s/landing-service.yaml
+            kubectl apply -f k8s/invoice-deployment.yaml
+            kubectl apply -f k8s/invoice-service.yaml
+            kubectl apply -f k8s/ingress.yaml
+
+            # Restart deployments to use new images
+            kubectl rollout restart deployment/vostra-landing -n vostra
+            kubectl rollout restart deployment/vostra-invoice -n vostra
+
+            # Wait for rollout to complete
+            kubectl rollout status deployment/vostra-landing -n vostra --timeout=120s
+            kubectl rollout status deployment/vostra-invoice -n vostra --timeout=120s
+
+            # Clean up old images
             docker image prune -f
+
+            # Show final status
+            echo "=== Deployment Status ==="
+            kubectl get pods -n vostra
