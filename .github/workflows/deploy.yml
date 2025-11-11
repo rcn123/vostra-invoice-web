@@ -42,16 +42,16 @@ jobs:
             kubectl apply -f k8s/ingress.yaml
 
             # Restart deployments to use new images
-            kubectl rollout restart deployment/vostra-landing -n vostra
-            kubectl rollout restart deployment/vostra-invoice -n vostra
+            kubectl rollout restart deployment/vostra-landing -n vostra-invoice
+            kubectl rollout restart deployment/vostra-invoice -n vostra-invoice
 
             # Wait for rollout to complete
-            kubectl rollout status deployment/vostra-landing -n vostra --timeout=120s
-            kubectl rollout status deployment/vostra-invoice -n vostra --timeout=120s
+            kubectl rollout status deployment/vostra-landing -n vostra-invoice --timeout=120s
+            kubectl rollout status deployment/vostra-invoice -n vostra-invoice --timeout=120s
 
             # Clean up old images
             docker image prune -f
 
             # Show final status
             echo "=== Deployment Status ==="
-            kubectl get pods -n vostra
+            kubectl get pods -n vostra-invoice
