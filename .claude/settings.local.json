@@ -32,7 +32,11 @@
       "Bash(kubectl rollout:*)",
       "Bash(nslookup:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(kubectl logs:*)",
+      "Bash(kubectl top:*)",
+      "Bash(lspci:*)",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": []
