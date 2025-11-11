@@ -1,0 +1,1 @@
+s namespace should be vostra-invoice, not vostra
