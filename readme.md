@@ -1,5 +1,5 @@
 # VostraInvoice Web
-#
+
 Public marketing website and demo for VostraInvoice - AI-powered invoice processing for Swedish municipalities and organizations.
 
 **Live at:** https://vostra.ai/vostra-invoice/
