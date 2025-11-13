@@ -16,13 +16,13 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.HETZNER_SSH_KEY }}" | base64 -d > ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.HETZNER_HOST }} >> ~/.ssh/known_hosts
           echo "Key fingerprint:"
           ssh-keygen -l -f ~/.ssh/id_ed25519
 
-      - name: Deploy to Hetzner Kubernetes X
+      - name: Deploy to Hetzner Kubernetes
         run: |
           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} << 'EOF'
             cd /var/www/vostra-invoice-web
