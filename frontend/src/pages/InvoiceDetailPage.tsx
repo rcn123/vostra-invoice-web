@@ -137,7 +137,7 @@ export default function InvoiceDetailPage() {
         </div>
 
         {/* Line Items */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Fakturarader</h2>
             <p className="text-sm text-gray-600 mt-1">
@@ -145,7 +145,7 @@ export default function InvoiceDetailPage() {
             </p>
           </div>
 
-          <div className="overflow-x-auto overflow-y-visible">
+          <div className="overflow-x-auto" style={{ overflowY: 'visible' }}>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
