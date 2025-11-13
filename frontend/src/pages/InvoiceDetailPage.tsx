@@ -202,10 +202,24 @@ export default function InvoiceDetailPage() {
                           />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <span className="text-sm font-medium text-gray-900">
-                              {Math.round(selectedSuggestion.confidence * 100)} %
-                            </span>
+                          <div className="flex items-center justify-center gap-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full ${
+                                    selectedSuggestion.confidence >= 0.9
+                                      ? 'bg-green-500'
+                                      : selectedSuggestion.confidence >= 0.7
+                                      ? 'bg-yellow-500'
+                                      : 'bg-gray-400'
+                                  }`}
+                                  style={{ width: `${selectedSuggestion.confidence * 100}%` }}
+                                />
+                              </div>
+                              <span className="text-sm font-medium text-gray-900 w-12">
+                                {Math.round(selectedSuggestion.confidence * 100)} %
+                              </span>
+                            </div>
                             <button
                               onClick={() => toggleExplanation(line.line_number)}
                               className="text-gray-400 hover:text-gray-600 focus:outline-none"
