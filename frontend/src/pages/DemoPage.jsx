@@ -10,7 +10,7 @@ export default function DemoPage() {
 
         <div className="bg-white rounded-lg shadow-md p-12 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Demo kommer snart
+            Demo kommer snart DEMO!
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Vi bygger just nu en interaktiv demo av VostraInvoice
