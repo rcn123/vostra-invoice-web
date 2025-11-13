@@ -37,7 +37,11 @@
       "Bash(kubectl top:*)",
       "Bash(lspci:*)",
       "Bash(git config:*)",
-      "Bash(ss -tlnp:*)"
+      "Bash(ss -tlnp:*)",
+      "Bash(for:*)",
+      "Bash(do mv \"$f\" \"$f%.jsx.tsx\")",
+      "Bash(done)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
