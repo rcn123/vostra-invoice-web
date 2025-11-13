@@ -44,7 +44,7 @@ export default function AccountDropdown({ suggestions, selectedAccount, onChange
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.account_number}
