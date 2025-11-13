@@ -60,8 +60,8 @@ export const mockInvoices: Invoice[] = [
       phone: '08-508 370 00'
     },
     buyer: {
-      name: 'Timrå Kommun',
-      address: 'Storgatan 14, 861 33 Timrå'
+      name: 'Sundsvalls Kommun',
+      address: 'Storgatan 14, 851 85 Sundsvall'
     },
     lines: [
       {
@@ -127,8 +127,8 @@ export const mockInvoices: Invoice[] = [
       phone: '08-123 456 78'
     },
     buyer: {
-      name: 'Timrå Kommun',
-      address: 'Storgatan 14, 861 33 Timrå'
+      name: 'Sundsvalls Kommun',
+      address: 'Storgatan 14, 851 85 Sundsvall'
     },
     lines: [
       {
@@ -184,8 +184,8 @@ export const mockInvoices: Invoice[] = [
       phone: '060-12 34 56'
     },
     buyer: {
-      name: 'Timrå Kommun',
-      address: 'Storgatan 14, 861 33 Timrå'
+      name: 'Sundsvalls Kommun',
+      address: 'Storgatan 14, 851 85 Sundsvall'
     },
     lines: [
       {
