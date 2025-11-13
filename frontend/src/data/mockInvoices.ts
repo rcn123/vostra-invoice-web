@@ -1,6 +1,13 @@
 // Mock invoice data following ground-truth-schema.json
 // All data is realistic Swedish invoice examples
 
+export interface AISuggestion {
+  account_number: string;
+  account_name: string;
+  confidence: number;
+  explanation: string;
+}
+
 export interface LineItem {
   line_number: number;
   description: string;
@@ -11,12 +18,8 @@ export interface LineItem {
   amount: number;
   vat_rate: number;
   vat_amount: number;
-  // AI prediction fields
-  ai_suggestion?: {
-    account_number: string;
-    confidence: number;
-    explanation: string;
-  };
+  // AI prediction fields - multiple suggestions ranked by confidence
+  ai_suggestions: AISuggestion[];
   // User correction
   user_account?: string;
   approved: boolean;
@@ -71,11 +74,26 @@ export const mockInvoices: Invoice[] = [
         amount: 22257,
         vat_rate: 0,
         vat_amount: 0,
-        ai_suggestion: {
-          account_number: '5010',
-          confidence: 0.92,
-          explanation: 'Lokalhyra klassificeras vanligtvis som konto 5010 (Lokalhyra)'
-        },
+        ai_suggestions: [
+          {
+            account_number: '5010',
+            account_name: 'Lokalhyra',
+            confidence: 0.92,
+            explanation: 'Lokalhyra klassificeras vanligtvis som konto 5010'
+          },
+          {
+            account_number: '5000',
+            account_name: 'Lokalkostnader',
+            confidence: 0.78,
+            explanation: 'Alternativ för generella lokalkostnader'
+          },
+          {
+            account_number: '5020',
+            account_name: 'Fastighetskostnader',
+            confidence: 0.45,
+            explanation: 'Möjlig klassificering som fastighetskostnad'
+          }
+        ],
         approved: false
       },
       {
@@ -85,11 +103,26 @@ export const mockInvoices: Invoice[] = [
         amount: 3227,
         vat_rate: 0,
         vat_amount: 0,
-        ai_suggestion: {
-          account_number: '5020',
-          confidence: 0.88,
-          explanation: 'Uppvärmning och energi kategoriseras under 5020 (Fastighetskostnader)'
-        },
+        ai_suggestions: [
+          {
+            account_number: '5020',
+            account_name: 'Fastighetskostnader',
+            confidence: 0.88,
+            explanation: 'Uppvärmning kategoriseras under fastighetskostnader'
+          },
+          {
+            account_number: '5060',
+            account_name: 'Elkostnader',
+            confidence: 0.65,
+            explanation: 'Energikostnader kan också klassas som el'
+          },
+          {
+            account_number: '5010',
+            account_name: 'Lokalhyra',
+            confidence: 0.32,
+            explanation: 'Mindre sannolik klassificering'
+          }
+        ],
         approved: false
       },
       {
@@ -99,11 +132,26 @@ export const mockInvoices: Invoice[] = [
         amount: 8329,
         vat_rate: 0,
         vat_amount: 0,
-        ai_suggestion: {
-          account_number: '5060',
-          confidence: 0.94,
-          explanation: 'Elkostnader bokförs normalt på 5060 (Elkostnader)'
-        },
+        ai_suggestions: [
+          {
+            account_number: '5060',
+            account_name: 'Elkostnader',
+            confidence: 0.94,
+            explanation: 'Elkostnader bokförs normalt på 5060'
+          },
+          {
+            account_number: '5020',
+            account_name: 'Fastighetskostnader',
+            confidence: 0.72,
+            explanation: 'Kan kategoriseras som fastighetskostnad'
+          },
+          {
+            account_number: '5000',
+            account_name: 'Lokalkostnader',
+            confidence: 0.28,
+            explanation: 'Alternativ vid osäkerhet'
+          }
+        ],
         approved: false
       }
     ],
@@ -140,11 +188,20 @@ export const mockInvoices: Invoice[] = [
         amount: 895,
         vat_rate: 25,
         vat_amount: 223.75,
-        ai_suggestion: {
-          account_number: '6100',
-          confidence: 0.96,
-          explanation: 'Kontorsmaterial bokförs på 6100 (Kontorsmaterial och trycksaker)'
-        },
+        ai_suggestions: [
+          {
+            account_number: '6100',
+            account_name: 'Kontorsmaterial',
+            confidence: 0.96,
+            explanation: 'Kontorspapper bokförs på 6100'
+          },
+          {
+            account_number: '6110',
+            account_name: 'Trycksaker',
+            confidence: 0.58,
+            explanation: 'Alternativ klassificering'
+          }
+        ],
         approved: false
       },
       {
@@ -156,11 +213,20 @@ export const mockInvoices: Invoice[] = [
         amount: 625,
         vat_rate: 25,
         vat_amount: 156.25,
-        ai_suggestion: {
-          account_number: '6100',
-          confidence: 0.98,
-          explanation: 'Pennor och skrivmaterial är kontorsmaterial (6100)'
-        },
+        ai_suggestions: [
+          {
+            account_number: '6100',
+            account_name: 'Kontorsmaterial',
+            confidence: 0.98,
+            explanation: 'Pennor och skrivmaterial är kontorsmaterial'
+          },
+          {
+            account_number: '6110',
+            account_name: 'Trycksaker',
+            confidence: 0.42,
+            explanation: 'Mindre sannolik klassificering'
+          }
+        ],
         approved: false
       }
     ],
@@ -197,11 +263,26 @@ export const mockInvoices: Invoice[] = [
         amount: 11400,
         vat_rate: 25,
         vat_amount: 2850,
-        ai_suggestion: {
-          account_number: '6230',
-          confidence: 0.91,
-          explanation: 'Städtjänster klassas som 6230 (Städning och renhållning)'
-        },
+        ai_suggestions: [
+          {
+            account_number: '6230',
+            account_name: 'Städning och renhållning',
+            confidence: 0.91,
+            explanation: 'Städtjänster klassas som 6230'
+          },
+          {
+            account_number: '6210',
+            account_name: 'Fastighetstjänster',
+            confidence: 0.68,
+            explanation: 'Alternativ vid fastighetsinriktad städning'
+          },
+          {
+            account_number: '6200',
+            account_name: 'Övriga lokalkostnader',
+            confidence: 0.41,
+            explanation: 'Generell kategori för lokalkostnader'
+          }
+        ],
         approved: false
       }
     ],

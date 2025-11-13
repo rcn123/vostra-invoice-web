@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { mockInvoices, LineItem } from '../data/mockInvoices';
 import { useState } from 'react';
 import DemoLayout from '../components/DemoLayout';
+import AccountDropdown from '../components/AccountDropdown';
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -35,7 +36,7 @@ export default function InvoiceDetailPage() {
   const handleApproveLine = (lineNumber: number) => {
     setLines(lines.map(line =>
       line.line_number === lineNumber
-        ? { ...line, approved: true, user_account: line.ai_suggestion?.account_number }
+        ? { ...line, approved: true, user_account: line.user_account || line.ai_suggestions[0]?.account_number }
         : line
     ));
   };
@@ -145,10 +146,7 @@ export default function InvoiceDetailPage() {
                     Belopp
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    AI-förslag
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Sannolikhet
+                    AI-förslag (med sannolikhet)
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -169,47 +167,21 @@ export default function InvoiceDetailPage() {
                           Period: {line.period}
                         </div>
                       )}
-                      {line.ai_suggestion && (
+                      {line.ai_suggestions[0] && (
                         <div className="text-xs text-gray-600 mt-2 italic">
-                          💡 {line.ai_suggestion.explanation}
+                          💡 {line.ai_suggestions[0].explanation}
                         </div>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 font-medium">
                       {formatCurrency(line.amount)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <select
-                        value={line.user_account || line.ai_suggestion?.account_number || ''}
-                        onChange={(e) => handleAccountChange(line.line_number, e.target.value)}
-                        className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        {line.ai_suggestion && (
-                          <option value={line.ai_suggestion.account_number}>
-                            {line.ai_suggestion.account_number}
-                          </option>
-                        )}
-                        <option value="5010">5010 - Lokalhyra</option>
-                        <option value="5020">5020 - Fastighetskostnader</option>
-                        <option value="5060">5060 - Elkostnader</option>
-                        <option value="6100">6100 - Kontorsmaterial</option>
-                        <option value="6230">6230 - Städning</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      {line.ai_suggestion && (
-                        <div className="inline-flex items-center">
-                          <div className="text-sm font-medium text-gray-900">
-                            {Math.round(line.ai_suggestion.confidence * 100)}%
-                          </div>
-                          <div className="ml-2 w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-green-500"
-                              style={{ width: `${line.ai_suggestion.confidence * 100}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
+                    <td className="px-6 py-4">
+                      <AccountDropdown
+                        suggestions={line.ai_suggestions}
+                        selectedAccount={line.user_account || line.ai_suggestions[0]?.account_number || ''}
+                        onChange={(account) => handleAccountChange(line.line_number, account)}
+                      />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       {line.approved ? (
