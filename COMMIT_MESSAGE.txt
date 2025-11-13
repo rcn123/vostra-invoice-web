@@ -1,0 +1,43 @@
+Deploy to Kubernetes with HTTPS and automated CI/CD
+
+Major infrastructure upgrade from Docker Compose to Kubernetes:
+
+Infrastructure Changes:
+- Migrated to k3s (Kubernetes) with Traefik ingress
+- SSL via cert-manager + Let's Encrypt (auto-renewal)
+- Namespace: vostra-invoice (proper naming)
+- Path-based routing: / (landing) and /vostra-invoice/ (app)
+- 2 replicas each for HA
+
+Live URLs:
+- https://vostra.ai/ (landing page)
+- https://vostra.ai/vostra-invoice/ (React app)
+
+Files Added:
+- README.md - Comprehensive documentation
+- k8s/ - All Kubernetes manifests
+- landing/ - Simple landing page for root path
+- cc/DEPLOYMENT-COMPLETE.md - Deployment completion summary
+
+Files Updated:
+- DEPLOYMENT.md - Full k8s deployment guide
+- .github/workflows/deploy.yml - Deploy to k8s (not docker-compose)
+- frontend/nginx.conf - Fixed /vostra-invoice/ path handling
+- frontend/vite.config.js - Added base: '/vostra-invoice/'
+- frontend/src/App.jsx - Added basename="/vostra-invoice"
+- deploy.sh - Updated to use docker compose v2
+
+Issues Fixed:
+- Port 80 conflicts resolved (google-eshop scaled down)
+- Blank page at /vostra-invoice/ fixed (nginx config)
+- SSL certificate issued for vostra.ai
+- Namespace properly named (vostra-invoice)
+
+Resources Available:
+- CPU: ~2.75 cores free (31% used)
+- Memory: ~5GB free (39% used)
+- Ready for inference deployment
+
+🤖 Generated with Claude Code (https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>

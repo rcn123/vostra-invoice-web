@@ -33,7 +33,10 @@
       "Bash(nslookup:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "WebFetch(domain:code.claude.com)"
+      "Bash(kubectl logs:*)",
+      "Bash(kubectl top:*)",
+      "Bash(lspci:*)",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": []

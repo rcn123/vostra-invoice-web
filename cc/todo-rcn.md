@@ -1,6 +1,9 @@
  
   What's Already Deployed:
 
+(på servern finns vi på /var/www)  
+
+
   - ✅ https://vostra.ai/ (landing page)
   - ✅ https://vostra.ai/vostra-invoice/ (invoice app)
   - ✅ SSL certificate (auto-renews)
