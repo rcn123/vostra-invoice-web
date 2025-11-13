@@ -12,7 +12,7 @@ export default function Hero() {
           Smidig fakturahantering för kommuner och små organisationer
         </p>
         <a
-          href="/demo"
+          href="/vostra-invoice/demo"
           className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-lg text-lg transition-colors"
         >
           Testa Demo
