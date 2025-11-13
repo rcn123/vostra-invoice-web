@@ -16,9 +16,13 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.HETZNER_HOST }} >> ~/.ssh/known_hosts
+          echo "Key fingerprint:"
+          ssh-keygen -l -f ~/.ssh/id_ed25519 || echo "Key validation failed"
+          echo "Key content (first line):"
+          head -1 ~/.ssh/id_ed25519
 
       - name: Deploy to Hetzner Kubernetes
         run: |
