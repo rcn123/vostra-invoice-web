@@ -1,0 +1,247 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Swedish Invoice Ground Truth Schema",
+  "description": "Comprehensive schema for Swedish invoice extraction - supports both Donut and LayoutLMv3 training. Enhanced with kommun/accounting fields.",
+  "version": "1.1.0",
+
+  "definitions": {
+    "supplier": {
+      "type": "object",
+      "description": "Supplier/vendor issuing the invoice",
+      "properties": {
+        "name": {"type": "string", "description": "Company name"},
+        "org_number": {"type": "string", "pattern": "^\\d{6}-\\d{4}$", "description": "Swedish org number (XXXXXX-XXXX)"},
+        "vat_number": {"type": "string", "pattern": "^SE\\d{12}$", "description": "Swedish VAT number (SEXXXXXXXXXXXX)"},
+        "address": {"type": "string", "description": "Full postal address"},
+        "country": {"type": "string", "description": "Country code (SE, NO, DK, etc.)"},
+        "phone": {"type": "string", "description": "Phone number"},
+        "email": {"type": "string", "format": "email"},
+        "website": {"type": "string", "format": "uri"},
+        "plusgiro": {"type": "string", "description": "Plusgiro account number"},
+        "bankgiro": {"type": "string", "description": "Bankgiro account number"},
+        "iban": {"type": "string", "description": "IBAN for international payments"},
+        "bic": {"type": "string", "description": "BIC/SWIFT code"}
+      },
+      "required": ["name"]
+    },
+
+    "buyer": {
+      "type": "object",
+      "description": "Buyer/customer receiving the invoice",
+      "properties": {
+        "name": {"type": "string", "description": "Customer company name"},
+        "contact": {"type": "string", "description": "Contact person or c/o"},
+        "address": {"type": "string", "description": "Full postal address"},
+        "org_number": {"type": "string", "pattern": "^\\d{6}-\\d{4}$"},
+        "customer_number": {"type": "string", "description": "Supplier's customer reference number"},
+        "department": {"type": "string", "description": "Department/förvaltning/nämnd (for kommun/government)"},
+        "email": {"type": "string", "format": "email"},
+        "phone": {"type": "string"}
+      },
+      "required": ["name"]
+    },
+
+    "line_item": {
+      "type": "object",
+      "properties": {
+        "line_number": {"type": "integer", "description": "Line item number"},
+        "description": {"type": "string", "description": "Item description"},
+        "period": {"type": "string", "description": "Service period (e.g., '2025-07-01 – 2025-09-30')"},
+        "quantity": {"type": "number", "description": "Quantity"},
+        "unit": {"type": "string", "description": "Unit (st, kg, timme, etc.)"},
+        "unit_price": {"type": "number", "description": "Price per unit"},
+        "amount": {"type": "number", "description": "Total line amount (excl VAT)"},
+        "vat_rate": {"type": "number", "description": "VAT rate percentage (25, 12, 6, 0)"},
+        "vat_amount": {"type": "number", "description": "VAT amount for this line"},
+        "account_number": {"type": "string", "description": "BAS-konto number for accounting"},
+        "cost_center": {"type": "string", "description": "Kostnadsställe"},
+        "project": {"type": "string", "description": "Projektkod"},
+        "object": {"type": "string", "description": "Objektkod"}
+      },
+      "required": ["description", "amount"]
+    },
+
+    "vat_breakdown": {
+      "type": "object",
+      "properties": {
+        "rate": {"type": "number", "description": "VAT rate percentage"},
+        "taxable_amount": {"type": "number", "description": "Amount before VAT"},
+        "vat_amount": {"type": "number", "description": "VAT amount"}
+      },
+      "required": ["rate", "vat_amount"]
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "image": {
+      "type": "string",
+      "description": "Path to source PDF/image file"
+    },
+
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "processing_date": {"type": "string", "format": "date-time"},
+        "document_type": {"type": "string", "enum": ["invoice", "credit_note", "receipt"]},
+        "format_type": {"type": "string", "enum": ["scanned", "text_pdf", "structured"]},
+        "language": {"type": "string", "default": "sv"},
+        "extractor": {"type": "string", "description": "Tool used (gpt-4-vision, azure, etc.)"}
+      }
+    },
+
+    "ground_truth": {
+      "type": "object",
+      "properties": {
+        "invoice_number": {"type": "string", "description": "Invoice number"},
+        "invoice_date": {"type": "string", "format": "date", "description": "Invoice date (ISO 8601)"},
+        "due_date": {"type": "string", "format": "date", "description": "Payment due date (ISO 8601)"},
+        "issue_date": {"type": "string", "format": "date", "description": "Issue/print date (ISO 8601)"},
+        "delivery_date": {"type": "string", "format": "date", "description": "Delivery date (ISO 8601)"},
+        "booking_date": {"type": "string", "format": "date", "description": "Bokföringsdatum (accounting date)"},
+
+        "supplier": {"$ref": "#/definitions/supplier"},
+        "buyer": {"$ref": "#/definitions/buyer"},
+
+        "verifikationsnummer": {"type": "string", "description": "Internal reference/verification number (kommun)"},
+
+        "contract_number": {"type": "string", "description": "Contract reference"},
+        "customer_number": {"type": "string", "description": "Customer number at vendor"},
+        "order_number": {"type": "string", "description": "Order reference"},
+        "reference": {"type": "string", "description": "Your reference/our reference"},
+
+        "lines": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/line_item"},
+          "description": "Invoice line items"
+        },
+
+        "subtotal": {"type": "number", "description": "Subtotal before VAT"},
+        "vat_breakdown": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/vat_breakdown"},
+          "description": "VAT breakdown by rate"
+        },
+        "vat_amount": {"type": "number", "description": "Total VAT amount"},
+        "total": {"type": "number", "description": "Total amount including VAT"},
+        "currency": {"type": "string", "default": "SEK", "description": "Currency code (ISO 4217)"},
+
+        "payment_method": {"type": "string", "description": "Payment method (Plusgiro, Bankgiro, etc.)"},
+        "ocr_number": {"type": "string", "description": "OCR/reference number for payment"},
+        "iban": {"type": "string", "description": "IBAN for payment"},
+        "bic": {"type": "string", "description": "BIC/SWIFT code"},
+
+        "interest_rate": {"type": "string", "description": "Late payment interest rate"},
+        "payment_terms": {"type": "string", "description": "Payment terms (e.g., '30 dagar netto')"},
+        "period": {"type": "string", "description": "Overall billing period"},
+
+        "notes": {"type": "string", "description": "Additional notes or terms"},
+        "reverse_charge": {"type": "boolean", "description": "Is this a reverse charge invoice?"},
+        "credit_note": {"type": "boolean", "description": "Is this a credit note?"}
+      },
+      "required": ["invoice_number", "invoice_date", "supplier", "total", "currency"]
+    },
+
+    "ocr_data": {
+      "type": "object",
+      "description": "Optional: OCR extraction for bounding boxes (LayoutLMv3)",
+      "properties": {
+        "words": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {"type": "string"},
+              "bbox": {
+                "type": "array",
+                "items": {"type": "number"},
+                "minItems": 4,
+                "maxItems": 4,
+                "description": "[x0, y0, x1, y1] normalized to 0-1000"
+              },
+              "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+            },
+            "required": ["text", "bbox"]
+          }
+        },
+        "page_dimensions": {
+          "type": "object",
+          "properties": {
+            "width": {"type": "integer"},
+            "height": {"type": "integer"}
+          }
+        }
+      }
+    },
+
+    "field_mappings": {
+      "type": "object",
+      "description": "Optional: Maps ground_truth fields to OCR word indices",
+      "properties": {
+        "invoice_number": {"type": "array", "items": {"type": "integer"}},
+        "invoice_date": {"type": "array", "items": {"type": "integer"}},
+        "supplier.name": {"type": "array", "items": {"type": "integer"}},
+        "total": {"type": "array", "items": {"type": "integer"}}
+      }
+    }
+  },
+
+  "required": ["image", "ground_truth"],
+
+  "examples": [
+    {
+      "image": "data/raw/(250630-1) SvBoost ff juni_33813.pdf",
+      "metadata": {
+        "processing_date": "2025-11-09T10:00:00Z",
+        "document_type": "invoice",
+        "format_type": "text_pdf",
+        "language": "sv",
+        "extractor": "gpt-4-vision"
+      },
+      "ground_truth": {
+        "invoice_number": "21196546317",
+        "invoice_date": "2025-06-09",
+        "due_date": "2025-06-30",
+        "issue_date": "2025-08-17",
+        "supplier": {
+          "name": "AB Svenska Bostäder",
+          "org_number": "556043-6429",
+          "vat_number": "SE556043642901",
+          "address": "Box 95, 16212 Vällingby",
+          "country": "SE",
+          "phone": "08-508 370 00",
+          "plusgiro": "819001-9"
+        },
+        "buyer": {
+          "name": "Excelligent AB",
+          "contact": "c/o Robert Carlsson",
+          "address": "S:t Göransgatan 67, Box 777, 112 38 Stockholm"
+        },
+        "contract_number": "3021565",
+        "customer_number": "9620",
+        "interest_rate": "8% + referensränta",
+        "lines": [
+          {
+            "object": "29031433",
+            "description": "Hyra lokal",
+            "period": "2025-07-01 – 2025-09-30",
+            "amount": 22257
+          },
+          {
+            "object": "29031433",
+            "description": "Tillägg värme/varmvatten",
+            "period": "2025-07-01 – 2025-09-30",
+            "amount": 3227
+          }
+        ],
+        "subtotal": 27050,
+        "vat_amount": 0,
+        "total": 33813,
+        "currency": "SEK",
+        "payment_method": "Plusgiro",
+        "ocr_number": "21196546317",
+        "period": "2025-07–2025-09"
+      }
+    }
+  ]
+}
