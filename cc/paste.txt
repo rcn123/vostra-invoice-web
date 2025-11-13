@@ -1,84 +1,74 @@
-VostraInvoice – AI-kontering med människa i loopen
-Smidig fakturahantering för kommuner och små organisationer
+2. Format of the Sannolikhet column (visible state):
 
-VostraInvoice är en modern tjänst för att läsa in och föreslå kontering av leverantörsfakturor.
-Den kombinerar automatiserad texttolkning med anpassningsbara regler och manuell granskning – så att varje faktura hamnar rätt, snabbare och med bättre översikt.
+Display a percentage value, e.g. 82 %
 
-💡 Hur det fungerar just nu
+Display an information icon (i) next to the percentage
 
-Läs in fakturan
-Systemet tar emot PDF-fakturor (eller skannade bilder) och läser automatiskt ut leverantör, belopp, datum och fakturanummer.
-Stöd för e-fakturaformat (Peppol/Svefaktura) är under utveckling.
+All user-facing text must be in Swedish
 
-AI-förslag på kontering
-En kombination av enkla regler och AI-modeller ger ett förslag på konto och kostnadsställe.
-Systemet visar de tre mest troliga kontona, med kort motivering (“baserat på tidigare fakturor från leverantören”).
+Example cell:
 
-Granskning och godkännande
-Handläggaren granskar och justerar förslaget direkt i webbläsaren.
-Alla ändringar sparas i en enkel logg – vem som ändrat, vad och när.
-
-Export
-Resultatet kan laddas ner som CSV för import till ekonomisystem.
-
-⚙️ Funktioner i nuvarande version
-
-OCR-inläsning av PDF och bildfakturor
-
-Hybridmotor (regler + AI-förslag)
-
-Top-3-förslag med sannolikhet
-
-Granskningsvy i webbläsaren
-
-Enkelt regelgränssnitt (“om leverantör = Telia → konto 6212”)
-
-Grundläggande loggning och revisionsspår
-
-Testdata och KPI-visning (statisk dashboard)
-
-🔒 Säkerhet och drift
-
-Data lagras lokalt under testperioden
-
-Krypterad kommunikation (HTTPS)
-
-Ingen molnöverföring av fakturor utan godkännande
-
-GDPR-anpassad hantering i pilotläge
-
-🧭 Nästa steg
-
-VostraInvoice är i pilotfas men byggt för att växa.
-Kommande versioner kommer att stödja:
-
-Integration med Unit4 och Visma
-
-PEPPOL-inläsning och export
-
-Automatisk inlärning från korrektur
-
-🚀 Varför börja nu
-
-Du kan redan idag testa hur AI-baserad kontering fungerar på dina egna fakturor.
-
-Systemet sparar tid även utan full automation.
-
-Det är byggt för att utvecklas tillsammans med användarna.
+82 %  (i)
 
 
-----------------------
+3. Behavior when clicking (i) in the Sannolikhet column:
+Clicking the icon should open a small collapsible explanation box directly below that invoice row (do not use a modal or overlay).
+
+This box must show the AI explanation (XAI) for the currently selected account in Swedish.
+
+Suggested layout inside the explanation box:
+
+Förklaring:
+• Matchade ord: ”kontorsmaterial”, ”pennor”
+• Liknande historik: 37 fakturor
+• Osäkerhet: låg
+• Underlag: radtext + tidigare feedback
 
 
-Transparens som standard
-VostraInvoice loggar automatiskt varje steg i processen – från att fakturan tas emot till att konteringsförslag godkänns. Varje förslag, ändring och beslut tidsstämplas och sparas med full kontext, vilket ger en komplett spårbarhet för intern kontroll och revision.
-Förklarande AI
-Varje föreslaget konto eller kostnadsställe visas tillsammans med en kort förklaring. Systemet redovisar vilka mönster eller regler som lett till förslaget och visar även alternativa förslag med tillhörande sannolikhetsvärden. På så sätt blir besluten begripliga och granskningsbara.
-Människa i loopen
-Användaren har alltid sista ordet. Förslag kan granskas, godkännas eller justeras direkt i gränssnittet. Alla åtgärder registreras och används för att förbättra framtida precision – en naturlig inlärningscykel som stärker kvaliteten över tid.
-Hybrid intelligens
-VostraInvoice kombinerar maskininlärning med tydligt definierade redovisnings- och avtalsregler. Det ger tillförlitliga resultat även för leverantörer eller situationer med begränsat datastöd, och säkerställer att konteringen alltid följer organisationens kontoplan och regelverk.
-Dataskydd och efterlevnad
-Tjänsten hanterar enbart fakturadata från organisationer och kan driftsättas helt inom EU. All lagring och bearbetning sker enligt GDPR och följer riktlinjer för offentlig informationshantering.
-Öppna standarder och interoperabilitet
-VostraInvoice har inbyggt stöd för Peppol BIS 3 och Svefaktura – samma format som används av svenska kommuner och regioner. Det gör integrationen mot befintliga ekonomisystem enkel, säker och framtidssäker
+This explanation must update dynamically if the user changes the selected account in the dropdown.
+
+4. Add probabilities to each alternative in the dropdown list:
+When the user opens the dropdown to choose another konto, each alternative must show:
+
+Konto number + label
+
+Probability percentage
+
+A subtle, thin background bar representing the probability (very light pastel color)
+
+Example dropdown entry:
+
+[thin pastel-green bar width 82%]
+5110 – Kontorsmaterial        82 %
+
+
+Do NOT show explanations inside the dropdown — only in the collapsible explanation box triggered by (i).
+
+5. When user selects a new konto from the dropdown:
+
+Update the displayed selected account
+
+Update the Sannolikhet value accordingly
+
+Update the explanation box (if open) to show explanation for the newly selected account
+
+6. Visual style requirements:
+
+Clean, modern, Swedish-government/municipal aesthetic
+
+No heavy borders, no 2000s-style progressbars
+
+All Swedish text, concise and neutral
+
+Explanation box must be minimal and unobtrusive
+
+7. Purpose of this change:
+We want:
+
+top-1 account + its probability (visible)
+
+top-N alternatives with probabilities (dropdown)
+
+explainability (clickable)
+
+minimal cognitive load

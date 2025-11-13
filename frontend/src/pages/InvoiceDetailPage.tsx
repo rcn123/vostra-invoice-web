@@ -8,6 +8,7 @@ export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const invoice = mockInvoices.find(inv => inv.id === id);
   const [lines, setLines] = useState<LineItem[]>(invoice?.lines || []);
+  const [expandedExplanations, setExpandedExplanations] = useState<Set<number>>(new Set());
 
   if (!invoice) {
     return (
@@ -47,6 +48,18 @@ export default function InvoiceDetailPage() {
         ? { ...line, user_account: newAccount, approved: false }
         : line
     ));
+  };
+
+  const toggleExplanation = (lineNumber: number) => {
+    setExpandedExplanations(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(lineNumber)) {
+        newSet.delete(lineNumber);
+      } else {
+        newSet.add(lineNumber);
+      }
+      return newSet;
+    });
   };
 
   return (
@@ -146,7 +159,10 @@ export default function InvoiceDetailPage() {
                     Belopp
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    AI-förslag (med sannolikhet)
+                    AI-förslag
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Sannolikhet
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -155,57 +171,106 @@ export default function InvoiceDetailPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {lines.map((line) => (
-                  <tr key={line.line_number} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {line.line_number}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{line.description}</div>
-                      {line.period && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Period: {line.period}
-                        </div>
+                {lines.map((line) => {
+                  const selectedSuggestion = line.ai_suggestions.find(
+                    s => s.account_number === (line.user_account || line.ai_suggestions[0]?.account_number)
+                  ) || line.ai_suggestions[0];
+                  const isExpanded = expandedExplanations.has(line.line_number);
+
+                  return (
+                    <>
+                      <tr key={line.line_number} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {line.line_number}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900">{line.description}</div>
+                          {line.period && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              Period: {line.period}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 font-medium">
+                          {formatCurrency(line.amount)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <AccountDropdown
+                            suggestions={line.ai_suggestions}
+                            selectedAccount={line.user_account || line.ai_suggestions[0]?.account_number || ''}
+                            onChange={(account) => handleAccountChange(line.line_number, account)}
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="text-sm font-medium text-gray-900">
+                              {Math.round(selectedSuggestion.confidence * 100)} %
+                            </span>
+                            <button
+                              onClick={() => toggleExplanation(line.line_number)}
+                              className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                              title="Visa förklaring"
+                            >
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          {line.approved ? (
+                            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                              ✓ Godkänd
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                              Granskas
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                          {!line.approved && (
+                            <button
+                              onClick={() => handleApproveLine(line.line_number)}
+                              className="text-blue-600 hover:text-blue-900 font-medium"
+                            >
+                              Godkänn
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                      {isExpanded && selectedSuggestion.xai && (
+                        <tr key={`explanation-${line.line_number}`}>
+                          <td colSpan={7} className="px-6 py-4 bg-blue-50 border-l-4 border-blue-400">
+                            <div className="text-sm">
+                              <div className="font-semibold text-blue-900 mb-2">Förklaring:</div>
+                              <ul className="space-y-1 text-blue-800">
+                                <li>
+                                  <span className="font-medium">Matchade ord:</span>{' '}
+                                  {selectedSuggestion.xai.matched_words.length > 0
+                                    ? selectedSuggestion.xai.matched_words.map(w => `"${w}"`).join(', ')
+                                    : '–'}
+                                </li>
+                                <li>
+                                  <span className="font-medium">Liknande historik:</span>{' '}
+                                  {selectedSuggestion.xai.similar_history} fakturor
+                                </li>
+                                <li>
+                                  <span className="font-medium">Osäkerhet:</span>{' '}
+                                  {selectedSuggestion.xai.uncertainty}
+                                </li>
+                                <li>
+                                  <span className="font-medium">Underlag:</span>{' '}
+                                  {selectedSuggestion.xai.basis}
+                                </li>
+                              </ul>
+                            </div>
+                          </td>
+                        </tr>
                       )}
-                      {line.ai_suggestions[0] && (
-                        <div className="text-xs text-gray-600 mt-2 italic">
-                          💡 {line.ai_suggestions[0].explanation}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 font-medium">
-                      {formatCurrency(line.amount)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <AccountDropdown
-                        suggestions={line.ai_suggestions}
-                        selectedAccount={line.user_account || line.ai_suggestions[0]?.account_number || ''}
-                        onChange={(account) => handleAccountChange(line.line_number, account)}
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      {line.approved ? (
-                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                          ✓ Godkänd
-                        </span>
-                      ) : (
-                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                          Granskas
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      {!line.approved && (
-                        <button
-                          onClick={() => handleApproveLine(line.line_number)}
-                          className="text-blue-600 hover:text-blue-900 font-medium"
-                        >
-                          Godkänn
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                    </>
+                  );
+                })}
               </tbody>
             </table>
           </div>

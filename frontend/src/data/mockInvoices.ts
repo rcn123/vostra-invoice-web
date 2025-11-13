@@ -6,6 +6,12 @@ export interface AISuggestion {
   account_name: string;
   confidence: number;
   explanation: string;
+  xai?: {
+    matched_words: string[];
+    similar_history: number;
+    uncertainty: 'låg' | 'medel' | 'hög';
+    basis: string;
+  };
 }
 
 export interface LineItem {
@@ -79,19 +85,37 @@ export const mockInvoices: Invoice[] = [
             account_number: '5010',
             account_name: 'Lokalhyra',
             confidence: 0.92,
-            explanation: 'Lokalhyra klassificeras vanligtvis som konto 5010'
+            explanation: 'Lokalhyra klassificeras vanligtvis som konto 5010',
+            xai: {
+              matched_words: ['hyra', 'lokal'],
+              similar_history: 43,
+              uncertainty: 'låg',
+              basis: 'radtext + tidigare feedback'
+            }
           },
           {
             account_number: '5000',
             account_name: 'Lokalkostnader',
             confidence: 0.78,
-            explanation: 'Alternativ för generella lokalkostnader'
+            explanation: 'Alternativ för generella lokalkostnader',
+            xai: {
+              matched_words: ['lokal'],
+              similar_history: 28,
+              uncertainty: 'medel',
+              basis: 'radtext'
+            }
           },
           {
             account_number: '5020',
             account_name: 'Fastighetskostnader',
             confidence: 0.45,
-            explanation: 'Möjlig klassificering som fastighetskostnad'
+            explanation: 'Möjlig klassificering som fastighetskostnad',
+            xai: {
+              matched_words: [],
+              similar_history: 12,
+              uncertainty: 'hög',
+              basis: 'tidigare feedback'
+            }
           }
         ],
         approved: false
@@ -193,13 +217,25 @@ export const mockInvoices: Invoice[] = [
             account_number: '6100',
             account_name: 'Kontorsmaterial',
             confidence: 0.96,
-            explanation: 'Kontorspapper bokförs på 6100'
+            explanation: 'Kontorspapper bokförs på 6100',
+            xai: {
+              matched_words: ['kontorspapper', 'A4'],
+              similar_history: 52,
+              uncertainty: 'låg',
+              basis: 'radtext + tidigare feedback'
+            }
           },
           {
             account_number: '6110',
             account_name: 'Trycksaker',
             confidence: 0.58,
-            explanation: 'Alternativ klassificering'
+            explanation: 'Alternativ klassificering',
+            xai: {
+              matched_words: ['papper'],
+              similar_history: 15,
+              uncertainty: 'medel',
+              basis: 'radtext'
+            }
           }
         ],
         approved: false
