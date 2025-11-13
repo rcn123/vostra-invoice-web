@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import DemoLayout from '../components/DemoLayout';
 
 export default function UploadPage() {
   const [dragActive, setDragActive] = useState(false);
@@ -45,7 +46,7 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DemoLayout>
       <div className="max-w-3xl mx-auto px-6 py-8">
         {/* Breadcrumb */}
         <div className="mb-6">
@@ -169,6 +170,6 @@ export default function UploadPage() {
           </ul>
         </div>
       </div>
-    </div>
+    </DemoLayout>
   );
 }

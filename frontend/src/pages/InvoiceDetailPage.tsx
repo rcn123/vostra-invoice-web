@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { mockInvoices, LineItem } from '../data/mockInvoices';
 import { useState } from 'react';
+import DemoLayout from '../components/DemoLayout';
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -48,7 +49,7 @@ export default function InvoiceDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DemoLayout>
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Breadcrumb */}
         <div className="mb-6">
@@ -279,6 +280,6 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
       </div>
-    </div>
+    </DemoLayout>
   );
 }

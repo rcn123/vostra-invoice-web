@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
+import DemoLayout from '../components/DemoLayout';
 
 export default function DemoPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DemoLayout>
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="mb-8">
           <a href="/" className="text-blue-600 hover:text-blue-700">
@@ -57,6 +58,6 @@ export default function DemoPage() {
           </div>
         </div>
       </div>
-    </div>
+    </DemoLayout>
   );
 }

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { mockInvoices } from '../data/mockInvoices';
+import DemoLayout from '../components/DemoLayout';
 
 export default function InvoiceListPage() {
   const formatCurrency = (amount: number) => {
@@ -34,7 +35,7 @@ export default function InvoiceListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DemoLayout>
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -122,6 +123,6 @@ export default function InvoiceListPage() {
           </table>
         </div>
       </div>
-    </div>
+    </DemoLayout>
   );
 }
