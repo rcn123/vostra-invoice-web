@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vostra-ingress-default
+  namespace: vostra-invoice
+  annotations:
+    # HTTP only for catch-all (no TLS)
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    # Higher priority than other catch-all ingresses (default is 0)
+    traefik.ingress.kubernetes.io/router.priority: "100"
+spec:
+  ingressClassName: traefik
+  rules:
+  # No host specified = catch-all for any hostname/IP
+  - http:
+      paths:
+      - path: /vostra-invoice
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-invoice
+            port:
+              number: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-landing
+            port:
+              number: 80

@@ -36,7 +36,8 @@
       "Bash(kubectl logs:*)",
       "Bash(kubectl top:*)",
       "Bash(lspci:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(ss -tlnp:*)"
     ],
     "deny": [],
     "ask": []
