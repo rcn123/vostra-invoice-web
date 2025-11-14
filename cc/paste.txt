@@ -1,74 +1,235 @@
-2. Format of the Sannolikhet column (visible state):
+Det delas upp i:
 
-Display a percentage value, e.g. 82 %
+vostra-api (backend API)
 
-Display an information icon (i) next to the percentage
+vostra-ai-extractor
 
-All user-facing text must be in Swedish
+Frontend
 
-Example cell:
+Integrationstester
 
-82 %  (i)
+Mocking strategi
 
+Load/stress testing (krävs inte nu, men bra att ha med i planen)
 
-3. Behavior when clicking (i) in the Sannolikhet column:
-Clicking the icon should open a small collapsible explanation box directly below that invoice row (do not use a modal or overlay).
+Du vill inte lägga tre veckor på detta — men du behöver ett minimum som gör att du vågar deploya.
 
-This box must show the AI explanation (XAI) for the currently selected account in Swedish.
+1. Tester för vostra-api
 
-Suggested layout inside the explanation box:
+Det här är den kritiska delen. API:et måste hålla.
 
-Förklaring:
-• Matchade ord: ”kontorsmaterial”, ”pennor”
-• Liknande historik: 37 fakturor
-• Osäkerhet: låg
-• Underlag: radtext + tidigare feedback
+a) File upload test (FastAPI TestClient)
 
+Ladda upp en fake invoice (PDF eller dummy-bytar).
 
-This explanation must update dynamically if the user changes the selected account in the dropdown.
+Kontrollera:
 
-4. Add probabilities to each alternative in the dropdown list:
-When the user opens the dropdown to choose another konto, each alternative must show:
+HTTP 201
 
-Konto number + label
+Filen hamnar i /storage/uploads/...
 
-Probability percentage
+En rad skapas i invoices
 
-A subtle, thin background bar representing the probability (very light pastel color)
+Status = uploaded → blir extracting → blir extracted (mockad extractor)
 
-Example dropdown entry:
+b) Validation tester
 
-[thin pastel-green bar width 82%]
-5110 – Kontorsmaterial        82 %
+Fel filtyp (t.ex. .exe)
 
+Fil > maxstorlek
 
-Do NOT show explanations inside the dropdown — only in the collapsible explanation box triggered by (i).
+Tomt request
 
-5. When user selects a new konto from the dropdown:
+Dubbel uppladdning (ska ge 200, inte duplicera)
 
-Update the displayed selected account
+c) DB-integritet
 
-Update the Sannolikhet value accordingly
+Skapa invoice → hämta invoice → jämför att raw_ai_data sparas korrekt
 
-Update the explanation box (if open) to show explanation for the newly selected account
+Approve endpoint ska:
 
-6. Visual style requirements:
+Spara user_validated_data
 
-Clean, modern, Swedish-government/municipal aesthetic
+Sätta approved_at
 
-No heavy borders, no 2000s-style progressbars
+Inte skriva över raw_ai_data
 
-All Swedish text, concise and neutral
+d) Error flow
 
-Explanation box must be minimal and unobtrusive
+Simulera att AI-extractor svarar:
 
-7. Purpose of this change:
-We want:
+500
 
-top-1 account + its probability (visible)
+Timeout
 
-top-N alternatives with probabilities (dropdown)
+JSON-garbage
 
-explainability (clickable)
+Backend ska:
 
-minimal cognitive load
+Logga
+
+Sätta status = failed
+
+Inte crascha
+
+Allt detta kan testas med pytest + TestClient + en mockad HTTP-server.
+
+2. Tester för vostra-ai-extractor
+
+Du testar inte GPT — du testar din parser + din servicekontrakt.
+
+a) Extract endpoint
+
+Input med JSON {invoice_id, file_path}
+
+Simulera filen genom att peta in en fake-PNG eller fake-PDF
+
+Mocka GPT-svaret (en JSON-sträng)
+
+Kontrollera:
+
+Returnerar exakt rätt JSON
+
+Korrekta fält namn
+
+Felhantering när JSON saknar fält
+
+b) PEPPOL XML parser
+
+Liten PEPPOL-fil → validera att du får ut:
+
+invoice_number
+
+dates
+
+lines
+
+amounts
+
+c) GPT-integration (endast 1–2 smoke tests)
+
+Ett fåtal faktiska filer
+
+Verifiera att du får JSON och att response inte dödar servern
+
+3. Frontend tester
+
+Håll det minimalt. Det viktigaste är:
+
+a) Upload component
+
+Mocka backend → testa att filen skickas
+
+Testa felmeddelanden och visuella states
+
+b) Invoice detail view
+
+Mock API → rendera → kontrollera att alla AI-fält dyker upp
+
+Redigera några fält → tryck "approve" → mock backend → kontrollera payload
+
+Frontend behöver inte mycket mer än det här just nu.
+
+4. Integrationstester (end-to-end)
+
+Du behöver två:
+
+Test 1: “Happy path”
+
+Upload en fil
+
+Mock extractor → returnera JSON
+
+API lagrar raw_ai_data
+
+Frontend hämtar & visar
+
+Approve → API sparar validated_data
+
+Test 2: “Extractor failure”
+
+Upload fil
+
+Extractor returnerar 500
+
+API sätter status = “failed”
+
+Frontend visar "Extraction failed"
+
+Kör detta i docker-compose lokalt (inte i K8s).
+
+5. Mocking strategi
+
+Utan en bra mocking-strategi blir testerna ett helvete.
+
+För API:
+
+Mocka HTTP-anrop till ai-extractor med pytest_httpx eller respx.
+
+För AI-extractor:
+
+Mocka GPT-anrop med unittest.mock.patch eller pytest-mocker.
+
+För frontend:
+
+Mocka hela API-lagret med MSW (Mock Service Worker).
+
+6. Pre-production tests (optional men bra)
+
+Senare, när du ska sälja till kommuner (du kommer göra det):
+
+Load test (5–10 filer per sekund)
+
+Se att:
+
+DB inte dog
+
+Filstorage inte blev seppelinerad
+
+API skalar med 2 pods
+
+Security scan
+
+Trivy på images
+
+OWASP ZAP på API endpoints
+
+Kort: “Den här MVP:n behöver exakt de här testerna”
+
+Backend API
+
+Upload
+
+Approve
+
+Statusflow
+
+Error flow
+
+JSON-integritet
+
+AI-extractor
+
+Input → JSON output
+
+GPT parse
+
+PEPPOL parse
+
+Frontend
+
+Upload UI
+
+Approval UI
+
+Integration
+
+Happy path
+
+Extractor fails
+
+Mocking
+
+respx (API)
+
+mock GPT

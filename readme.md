@@ -4,40 +4,97 @@ Public marketing website and demo for VostraInvoice - AI-powered invoice process
 
 **Live at:** https://vostra.ai/vostra-invoice/
 
+## Current Status
+
+### ✅ Live & Working
+- **Frontend Demo**: Full invoice management UI with mock data
+- **TypeScript**: Complete conversion from JavaScript
+- **XAI Features**: Explainable AI with confidence scores and explanations
+- **Deployment**: Auto-deploy via GitHub Actions to Kubernetes
+- **SSL/HTTPS**: Let's Encrypt with auto-renewal
+
+### 🚧 In Development
+- **Backend API**: FastAPI service for file upload and database (see `cc/invoice-upload-implementation-plan.md`)
+- **AI Extraction**: GPT-4 Vision integration for PDF/image processing
+- **PostgreSQL**: Database for invoice storage
+
+## Demo Features
+
+Try the live demo at https://vostra.ai/vostra-invoice/
+
+- **Invoice List**: Browse invoices with status, supplier, and amounts
+- **Invoice Detail**: View full invoice with line items
+- **AI Suggestions**: Multiple account coding options with confidence scores
+- **XAI (Explainable AI)**:
+  - Visual confidence bars (green/yellow/gray)
+  - Clickable explanations showing matched words, history, and reasoning
+  - Dynamic updates when changing account selections
+- **Swedish Localization**: All text in Swedish for municipal users
+
 ## Tech Stack
 
-- **Frontend**: React + Vite + Tailwind CSS
-- **Backend**: Python FastAPI (planned)
+### Current (Production)
+- **Frontend**: React 19 + TypeScript + Vite + Tailwind CSS
 - **Infrastructure**: Kubernetes (k3s) on Hetzner with Traefik ingress
 - **SSL**: Let's Encrypt via cert-manager (auto-renewal)
 - **CI/CD**: GitHub Actions → Auto-deploy to k8s
+
+### Planned (Backend)
+- **API Service**: FastAPI (Python 3.11)
+- **AI Extraction**: Separate FastAPI service with OpenAI GPT-4 Vision
+- **Database**: PostgreSQL 15 with JSONB
+- **File Storage**: Kubernetes Persistent Volume Claims
+- **Future**: Local LLM (swappable from GPT-4)
 
 ## Project Structure
 
 ```
 vostra-invoice-web/
-├── frontend/              # React application (deployed to /vostra-invoice path)
+├── frontend/                      # React + TypeScript application ✅ LIVE
 │   ├── src/
-│   │   ├── components/   # Reusable components
-│   │   ├── pages/        # Page components
-│   │   └── App.jsx       # Main app with routing (basename="/vostra-invoice")
-│   ├── vite.config.js    # Vite config (base: '/vostra-invoice/')
-│   └── Dockerfile        # Multi-stage Docker build
-├── landing/              # Root landing page (deployed to / path)
-│   ├── index.html        # Simple landing page
-│   ├── nginx.conf        # Nginx config
-│   └── Dockerfile        # Landing page container
-├── k8s/                  # Kubernetes manifests
-│   ├── namespace.yaml           # vostra namespace
-│   ├── cluster-issuer.yaml      # Let's Encrypt ClusterIssuer
-│   ├── landing-deployment.yaml  # Landing page deployment
-│   ├── landing-service.yaml     # Landing page service
-│   ├── invoice-deployment.yaml  # Invoice app deployment
-│   ├── invoice-service.yaml     # Invoice app service
-│   └── ingress.yaml            # Traefik ingress with SSL
-├── cc/                   # Planning and notes
-├── .github/workflows/    # GitHub Actions CI/CD
-└── core-rules.md         # Development guidelines
+│   │   ├── components/           # Reusable components (AccountDropdown, DemoLayout)
+│   │   ├── pages/                # Invoice pages (List, Detail, Upload)
+│   │   ├── data/                 # Mock invoice data (mockInvoices.ts)
+│   │   └── App.tsx               # Main app with routing
+│   ├── vite.config.js            # Vite config (base: '/vostra-invoice/')
+│   ├── tsconfig.json             # TypeScript configuration
+│   └── Dockerfile                # Multi-stage Docker build
+├── backend/                       # Backend services 🚧 PLANNED
+│   ├── api/                      # Main API service (FastAPI)
+│   │   ├── app/
+│   │   │   ├── models/          # SQLAlchemy ORM models
+│   │   │   ├── schemas/         # Pydantic schemas
+│   │   │   ├── api/routes/      # API endpoints
+│   │   │   └── services/        # Business logic
+│   │   ├── alembic/             # Database migrations
+│   │   └── Dockerfile
+│   └── ai-extractor/             # AI extraction service (FastAPI)
+│       ├── app/
+│       │   └── services/        # GPT-4 Vision integration
+│       └── Dockerfile
+├── landing/                       # Root landing page ✅ LIVE
+│   ├── index.html
+│   ├── nginx.conf
+│   └── Dockerfile
+├── k8s/                           # Kubernetes manifests ✅ DEPLOYED
+│   ├── namespace.yaml            # vostra-invoice namespace
+│   ├── cluster-issuer.yaml       # Let's Encrypt ClusterIssuer
+│   ├── postgres-deployment.yaml  # PostgreSQL (planned)
+│   ├── api-deployment.yaml       # Backend API (planned)
+│   ├── ai-extractor-deployment.yaml  # AI service (planned)
+│   ├── landing-deployment.yaml   # Landing page
+│   ├── invoice-deployment.yaml   # Invoice app
+│   └── ingress.yaml              # Traefik ingress with SSL
+├── cc/                            # Planning and documentation
+│   ├── invoice-upload-implementation-plan.md  # 📋 Backend roadmap
+│   ├── ground-truth-schema.json  # Invoice data schema
+│   ├── overall-system-description.md
+│   └── core-rules.md             # Development principles
+├── .github/workflows/             # GitHub Actions CI/CD ✅ WORKING
+│   └── deploy.yml                # Auto-deploy on push to main
+├── claude.md                      # Session guide for Claude Code
+├── README.md                      # This file
+└── core-rules.md                  # Fail fast, no overengineering, Swedish text
 ```
 
 ## Live Deployment
@@ -56,6 +113,43 @@ vostra-invoice-web/
 - **Replicas**: 2 pods each (landing + invoice)
 
 ## Local Development
+
+### Backend Development (NEW - Phase 1)
+
+**1. Start PostgreSQL:**
+```bash
+cd backend
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+**2. Create `.env` file:**
+```bash
+cd backend/api
+cp .env.example .env
+# Edit .env if needed (defaults should work for local dev)
+```
+
+**3. Install dependencies:**
+```bash
+cd backend/api
+pip install -r requirements.txt
+```
+
+**4. Run database migrations:**
+```bash
+cd backend/api
+alembic upgrade head
+```
+
+**5. Start FastAPI server:**
+```bash
+cd backend/api
+uvicorn app.main:app --reload --port 8000
+```
+
+The API will be available at `http://localhost:8000`
+
+**API Documentation:** `http://localhost:8000/docs` (Swagger UI)
 
 ### Frontend Development
 
@@ -85,6 +179,8 @@ The app will be available at `http://localhost:5173/`
    - `HETZNER_HOST`: `65.21.145.222`
    - `HETZNER_USER`: `root`
    - `HETZNER_SSH_KEY`: Your SSH private key
+   - `DB_PASSWORD`: Strong PostgreSQL password for production
+   - `OPENAI_API_KEY`: Your OpenAI API key (sk-...)
 
 **Deploy:**
 
@@ -352,9 +448,39 @@ Ensure these are set (one-time setup):
 - **GitHub Actions**: Automated deployments
 - **SSH**: Secure deployment to server
 
-## Project Planning
+## Backend Implementation
 
-See `cc/project-plan.md` for full project roadmap.
+See **`cc/invoice-upload-implementation-plan.md`** for the complete backend roadmap including:
+
+- Two-service architecture (vostra-api + vostra-ai-extractor)
+- PostgreSQL schema design
+- OpenAI GPT-4 Vision integration
+- Kubernetes deployment configuration
+- 6 implementation phases with detailed tasks
+
+### Architecture Preview
+
+```
+React Frontend
+    ↓
+vostra-api (FastAPI)
+    ├── PostgreSQL (invoices, raw_ai_data, user_validated_data)
+    ├── File Storage (PVC)
+    └── → vostra-ai-extractor (FastAPI)
+              └── OpenAI GPT-4 Vision API
+                  (later: local LLM)
+```
+
+**Status Flow**: `uploaded → extracting → extracted → approved → failed`
+
+## Session Continuity
+
+For Claude Code sessions, see **`claude.md`** for:
+- Current project status
+- What's working vs what needs backend
+- Key design decisions
+- Troubleshooting guide
+- Session-to-session context
 
 ## Support
 

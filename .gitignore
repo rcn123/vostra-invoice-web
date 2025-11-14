@@ -1,0 +1,54 @@
+# Environment variables - NEVER COMMIT
+.env
+.env.local
+.env.*.local
+
+# Secrets - NEVER COMMIT
+k8s/secrets.yaml
+*.secret
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite3
+
+# Storage (uploaded files)
+storage/
+backend/api/storage/
+
+# Docker
+docker-compose.override.yml
