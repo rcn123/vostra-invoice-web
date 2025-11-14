@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     AI_EXTRACTOR_URL: str = "http://localhost:8001"
 
     # File Storage
-    STORAGE_PATH: str = "./storage/uploads"
+    STORAGE_PATH: str = "./storage/vostra-invoice-web/uploads"
     MAX_FILE_SIZE: int = 100 * 1024 * 1024  # 100MB
     ALLOWED_FILE_TYPES: list[str] = ["application/pdf", "image/png", "image/jpeg", "application/xml", "text/xml"]
 

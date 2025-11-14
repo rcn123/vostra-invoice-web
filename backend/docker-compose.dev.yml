@@ -1,9 +1,11 @@
 version: '3.8'
 
+name: vostra-invoice
+
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: vostra-postgres-dev
+    container_name: vostra-invoice-postgres-dev
     environment:
       POSTGRES_DB: vostra-invoice-web
       POSTGRES_USER: vostra
