@@ -41,24 +41,41 @@ jobs:
             # Build Docker images
             docker build -t vostra-landing:v1 ./landing
             docker build -t vostra-invoice-frontend:v1 ./frontend
+            docker build -t vostra-api:v1 ./backend/api
+            docker build -t vostra-ai-extractor:v1 ./backend/ai-extractor
 
             # Import images to k3s
             docker save vostra-landing:v1 | sudo k3s ctr images import -
             docker save vostra-invoice-frontend:v1 | sudo k3s ctr images import -
+            docker save vostra-api:v1 | sudo k3s ctr images import -
+            docker save vostra-ai-extractor:v1 | sudo k3s ctr images import -
 
             # Apply Kubernetes manifests (in case they changed)
             kubectl apply -f k8s/namespace.yaml
+            kubectl apply -f k8s/postgres-deployment.yaml
+            kubectl apply -f k8s/postgres-service.yaml
+            kubectl apply -f k8s/ai-extractor-deployment.yaml
+            kubectl apply -f k8s/ai-extractor-service.yaml
+            kubectl apply -f k8s/api-deployment.yaml
+            kubectl apply -f k8s/api-service.yaml
             kubectl apply -f k8s/landing-deployment.yaml
             kubectl apply -f k8s/landing-service.yaml
             kubectl apply -f k8s/invoice-deployment.yaml
             kubectl apply -f k8s/invoice-service.yaml
             kubectl apply -f k8s/ingress.yaml
 
+            # Wait for postgres to be ready before restarting other services
+            kubectl rollout status deployment/postgres -n vostra-invoice --timeout=180s
+
             # Restart deployments to use new images
+            kubectl rollout restart deployment/vostra-ai-extractor -n vostra-invoice
+            kubectl rollout restart deployment/vostra-api -n vostra-invoice
             kubectl rollout restart deployment/vostra-landing -n vostra-invoice
             kubectl rollout restart deployment/vostra-invoice -n vostra-invoice
 
             # Wait for rollout to complete
+            kubectl rollout status deployment/vostra-ai-extractor -n vostra-invoice --timeout=120s
+            kubectl rollout status deployment/vostra-api -n vostra-invoice --timeout=120s
             kubectl rollout status deployment/vostra-landing -n vostra-invoice --timeout=120s
             kubectl rollout status deployment/vostra-invoice -n vostra-invoice --timeout=120s
 

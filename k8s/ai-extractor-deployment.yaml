@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vostra-ai-extractor
+  namespace: vostra-invoice
+  labels:
+    app: vostra-ai-extractor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vostra-ai-extractor
+  template:
+    metadata:
+      labels:
+        app: vostra-ai-extractor
+    spec:
+      containers:
+      - name: ai-extractor
+        image: vostra-ai-extractor:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8001
+          name: http
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: openai-api-key
+        - name: OPENAI_MODEL
+          value: "gpt-4o"
+        - name: STORAGE_PATH
+          value: "/storage/vostra-invoice-web/uploads"
+        volumeMounts:
+        - name: shared-storage
+          mountPath: /storage
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: shared-storage
+        persistentVolumeClaim:
+          claimName: shared-storage-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-storage-pvc
+  namespace: vostra-invoice
+spec:
+  accessModes:
+    - ReadWriteMany  # Multiple pods can read/write (needed for API + AI extractor)
+  resources:
+    requests:
+      storage: 10Gi

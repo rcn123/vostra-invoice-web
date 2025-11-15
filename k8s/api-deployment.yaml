@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vostra-api
+  namespace: vostra-invoice
+  labels:
+    app: vostra-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vostra-api
+  template:
+    metadata:
+      labels:
+        app: vostra-api
+    spec:
+      containers:
+      - name: api
+        image: vostra-api:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: database-url
+        - name: AI_EXTRACTOR_URL
+          value: "http://vostra-ai-extractor:8001"
+        - name: STORAGE_PATH
+          value: "/storage/vostra-invoice-web/uploads"
+        - name: ENVIRONMENT
+          value: "production"
+        volumeMounts:
+        - name: shared-storage
+          mountPath: /storage
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: shared-storage
+        persistentVolumeClaim:
+          claimName: shared-storage-pvc
