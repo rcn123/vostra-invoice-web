@@ -52,7 +52,9 @@
       "Bash(docker stop:*)",
       "Bash(docker rm:*)",
       "Bash(docker start:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "WebSearch",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
