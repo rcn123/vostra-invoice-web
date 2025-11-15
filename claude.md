@@ -1,6 +1,6 @@
 # Claude Code Session Guide
 
-**Last Updated:** 2025-11-14
+**Last Updated:** 2025-11-14 (Phase 2 Complete)
 **Project:** VostraInvoice - AI-powered invoice processing for Swedish municipalities
 
 ---
@@ -36,56 +36,74 @@
    - AI suggestions with confidence scores and XAI data
    - Line items with BAS accounting codes
 
-4. **Backend Foundation (Phase 1 - NEW)** ✅
+4. **Backend Phase 1: vostra-api** ✅
    - **Directory structure**: `backend/api/` with organized modules
    - **FastAPI application**: Basic app with CORS, health endpoint
    - **Database**: PostgreSQL 15 with SQLAlchemy ORM
    - **Invoice model**: Full schema with JSONB fields for AI data
    - **Pydantic schemas**: Request/response validation
-   - **Alembic migrations**: Database versioning setup
+   - **Alembic migrations**: Database versioning, timestamptz for UTC
    - **File storage service**: Upload, save, delete utilities
    - **File validators**: Type, size, sanitization
    - **Configuration**: Environment-based settings
    - **Docker Compose**: Local PostgreSQL for development
    - **Database name**: `vostra-invoice-web` (consistent across dev/prod)
+   - **Storage path**: `/storage/vostra-invoice-web/uploads` (namespaced)
 
-### 🚧 In Progress / Next Phase
+5. **Backend Phase 2: vostra-ai-extractor** ✅
+   - **Directory structure**: `backend/ai-extractor/` with FastAPI app
+   - **OpenAI GPT-5 Vision**: Integration for invoice extraction
+   - **File loader**: Base64 encoding for Vision API
+   - **Extraction prompt**: Swedish invoice JSON schema
+   - **Endpoints**: `/`, `/health`, `/extract`
+   - **Configuration**: OPENAI_API_KEY, model=gpt-5
+   - **Storage**: Same path as vostra-api for file access
+   - **Testing guide**: `cc/phase-2-manual-testing.md` (PowerShell + venv)
 
-**Phase 2: vostra-ai-extractor** - See plan: `cc/invoice-upload-implementation-plan.md`
+### 🚧 Next Phase
 
-Two-service architecture:
-1. **vostra-api** (FastAPI): ✅ Foundation complete
-2. **vostra-ai-extractor** (FastAPI): 🚧 Next - AI extraction with OpenAI GPT-4 Vision
+**Phase 3: Service Integration** - See plan: `cc/invoice-upload-implementation-plan.md`
+
+Connect the two services:
+1. **vostra-api** (FastAPI): ✅ Complete
+2. **vostra-ai-extractor** (FastAPI): ✅ Complete
+3. **Integration**: 🚧 Next - Upload endpoint calls AI extractor
 
 ---
 
 ## Architecture Overview
 
-### Current (Frontend + Backend Foundation)
+### Current (Frontend + Backend Services Ready)
 ```
 React Frontend (TypeScript)
 ├── Mock Invoice Data
 ├── Demo Pages (List, Detail, Upload)
 └── XAI Features (Explainability)
 
-vostra-api (FastAPI) - Foundation Ready ✅
+vostra-api (FastAPI) ✅
 ├── Database: PostgreSQL (vostra-invoice-web)
 ├── Models: Invoice ORM with JSONB
 ├── File Storage: Upload/save utilities
 └── Validators: File type/size checks
+
+vostra-ai-extractor (FastAPI) ✅
+├── OpenAI GPT-5 Vision integration
+├── Base64 file loader
+├── /extract endpoint
+└── Ground-truth JSON schema prompt
 ```
 
-### In Progress (Full Stack)
+### Next: Integration (Phase 3)
 ```
 React Frontend
     ↓
-vostra-api (FastAPI) ✅ Foundation
+vostra-api (FastAPI) ✅
     ├── PostgreSQL Database ✅
     ├── File Storage ✅
-    ├── TODO: Upload endpoint
-    ├── TODO: Approve endpoint
-    └── → vostra-ai-extractor (FastAPI) 🚧 Next Phase
-              └── OpenAI GPT-4 Vision
+    ├── TODO: POST /api/invoices/upload (calls AI extractor)
+    ├── TODO: POST /api/invoices/{id}/approve
+    └── → vostra-ai-extractor (FastAPI) ✅
+              └── OpenAI GPT-5 Vision ✅
                   (later: local LLM)
 ```
 
@@ -95,8 +113,9 @@ vostra-api (FastAPI) ✅ Foundation
 
 ### Planning & Documentation
 - `cc/invoice-upload-implementation-plan.md` - **Complete backend implementation roadmap**
-- `cc/testing-strategy.md` - **MVP testing approach** (NEW)
-- `cc/todo-production.md` - **Future improvements** (Vault, monitoring, etc.) (NEW)
+- `cc/phase-2-manual-testing.md` - **Phase 2 testing guide** (PowerShell + venv)
+- `cc/testing-strategy.md` - **MVP testing approach**
+- `cc/todo-production.md` - **Future improvements** (Vault, monitoring, etc.)
 - `cc/ground-truth-schema.json` - Invoice data schema (Swedish format)
 - `cc/overall-system-description.md` - System overview
 - `cc/core-rules.md` - Development principles (fail fast, no overengineering, Swedish text)
@@ -111,17 +130,25 @@ vostra-api (FastAPI) ✅ Foundation
 - `frontend/src/components/DemoLayout.tsx` - Application layout
 - `frontend/src/data/mockInvoices.ts` - Mock invoice data
 
-### Backend (Phase 1 Complete)
+### Backend (Phases 1 & 2 Complete)
+
+**vostra-api (Phase 1):**
 - `backend/api/app/main.py` - FastAPI application
 - `backend/api/app/config.py` - Configuration management
 - `backend/api/app/database.py` - SQLAlchemy connection
-- `backend/api/app/models/invoice.py` - Invoice ORM model
+- `backend/api/app/models/invoice.py` - Invoice ORM model (timestamptz)
 - `backend/api/app/schemas/invoice.py` - Pydantic schemas
 - `backend/api/app/services/file_service.py` - File upload/storage
 - `backend/api/app/utils/validators.py` - File validation
 - `backend/api/alembic/` - Database migrations
 - `backend/docker-compose.dev.yml` - Local PostgreSQL
-- `backend/ai-extractor/` - AI extraction service (🚧 Phase 2)
+
+**vostra-ai-extractor (Phase 2):**
+- `backend/ai-extractor/app/main.py` - FastAPI application
+- `backend/ai-extractor/app/config.py` - OpenAI configuration
+- `backend/ai-extractor/app/services/openai_extractor.py` - GPT-5 Vision
+- `backend/ai-extractor/app/utils/file_loader.py` - Base64 file loading
+- `backend/ai-extractor/requirements.txt` - Dependencies
 
 ### Kubernetes & Deployment
 - `k8s/` - All Kubernetes manifests
@@ -138,12 +165,13 @@ vostra-api (FastAPI) ✅ Foundation
 - **Vite 7.2.2** for build
 - **Mock data** following ground-truth schema
 
-### Planned (Backend)
-- **FastAPI** (Python 3.11)
-- **PostgreSQL 15** with JSONB fields
-- **SQLAlchemy** + Alembic migrations
-- **OpenAI GPT-4 Vision** API (later: local LLM)
-- **Kubernetes** deployment
+### Backend (Implemented)
+- **FastAPI** (Python 3.11) ✅
+- **PostgreSQL 15** with JSONB fields ✅
+- **SQLAlchemy** + Alembic migrations (timestamptz) ✅
+- **OpenAI GPT-5 Vision** API ✅ (later: local LLM)
+- **Virtual environments** (venv) for isolation ✅
+- **Kubernetes** deployment - Phase 6 (planned)
 
 ---
 
@@ -193,19 +221,26 @@ vostra-api (FastAPI) ✅ Foundation
 
 See **`cc/invoice-upload-implementation-plan.md`** for complete roadmap.
 
-### Phase 1: Backend Foundation (Week 1)
-- Create `backend/api/` structure
-- Set up FastAPI with PostgreSQL
-- Implement file upload endpoint
-- Create database schema
+### ✅ Phase 1: Backend Foundation (Complete)
+- ✅ Created `backend/api/` structure
+- ✅ Set up FastAPI with PostgreSQL
+- ✅ Created database schema with timestamptz
+- ✅ File storage service and validators
 
-### Phase 2: AI Extractor (Week 2)
-- Create `backend/ai-extractor/` structure
-- Integrate OpenAI GPT-4 Vision
-- Implement `/extract` endpoint
+### ✅ Phase 2: AI Extractor (Complete)
+- ✅ Created `backend/ai-extractor/` structure
+- ✅ Integrated OpenAI GPT-5 Vision
+- ✅ Implemented `/extract` endpoint
+- ✅ Created manual testing guide
 
-### Phase 3-6: Integration, Frontend, Deployment
-- Connect services
+### 🚧 Phase 3: Service Integration (Next)
+- Create AI client in vostra-api
+- Implement POST /api/invoices/upload endpoint
+- Connect upload flow to AI extractor
+- Add status tracking (uploaded→extracting→extracted)
+
+### 📋 Phase 4-6: Additional Endpoints, Frontend, Deployment
+- Additional API endpoints (GET, approve)
 - Update frontend to use real API
 - Deploy to Kubernetes
 
@@ -219,13 +254,17 @@ See **`cc/invoice-upload-implementation-plan.md`** for complete roadmap.
 ✅ XAI explainability features working
 ✅ Deployment pipeline functional
 ✅ SSL/HTTPS working
+✅ **Backend API foundation (vostra-api)**
+✅ **AI extraction service (vostra-ai-extractor)**
+✅ **PostgreSQL database with invoice schema**
+✅ **OpenAI GPT-5 Vision integration**
 
-### What Needs Backend
-❌ Real file upload (currently mock)
-❌ AI extraction from PDFs/images
-❌ Database storage
-❌ User approval workflow
-❌ Account coding suggestions (currently hardcoded)
+### What Still Needs Implementation
+❌ Upload endpoint (connect frontend → API → AI extractor)
+❌ Service integration (vostra-api calls ai-extractor)
+❌ User approval workflow endpoint
+❌ GET endpoints for invoices
+❌ Frontend connected to real API (still using mocks)
 
 ### Database Status Flow (Planned)
 `uploaded → extracting → extracted → approved → failed`
@@ -308,8 +347,9 @@ git push origin main
 
 ### Why Two Backend Services?
 - **vostra-api**: Stable, handles DB and files
-- **vostra-ai-extractor**: Swappable (GPT-4 → local LLM)
+- **vostra-ai-extractor**: Swappable (GPT-5 → local LLM later)
 - Clean separation, easy to maintain
+- Can scale AI service independently
 
 ### Why JSONB in PostgreSQL?
 - Flexible schema for varying invoice formats

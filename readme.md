@@ -14,9 +14,10 @@ Public marketing website and demo for VostraInvoice - AI-powered invoice process
 - **SSL/HTTPS**: Let's Encrypt with auto-renewal
 
 ### 🚧 In Development
-- **Backend API**: FastAPI service for file upload and database (see `cc/invoice-upload-implementation-plan.md`)
-- **AI Extraction**: GPT-4 Vision integration for PDF/image processing
-- **PostgreSQL**: Database for invoice storage
+- **Backend API**: FastAPI service for file upload and database ✅ Phase 1 complete
+- **AI Extraction**: GPT-5 Vision integration for PDF/image processing ✅ Phase 2 complete
+- **Service Integration**: Connect vostra-api to ai-extractor (Phase 3 next)
+- See `cc/invoice-upload-implementation-plan.md` for roadmap
 
 ## Demo Features
 
@@ -39,12 +40,13 @@ Try the live demo at https://vostra.ai/vostra-invoice/
 - **SSL**: Let's Encrypt via cert-manager (auto-renewal)
 - **CI/CD**: GitHub Actions → Auto-deploy to k8s
 
-### Planned (Backend)
-- **API Service**: FastAPI (Python 3.11)
-- **AI Extraction**: Separate FastAPI service with OpenAI GPT-4 Vision
-- **Database**: PostgreSQL 15 with JSONB
-- **File Storage**: Kubernetes Persistent Volume Claims
-- **Future**: Local LLM (swappable from GPT-4)
+### Backend (In Development)
+- **API Service**: FastAPI (Python 3.11) ✅ Phase 1 complete
+- **AI Extraction**: Separate FastAPI service with OpenAI GPT-5 Vision ✅ Phase 2 complete
+- **Database**: PostgreSQL 15 with JSONB ✅ Phase 1 complete
+- **File Storage**: Local development ready, K8s PVC planned
+- **Next**: Service integration (Phase 3)
+- **Future**: Local LLM (swappable from GPT-5)
 
 ## Project Structure
 
@@ -59,19 +61,21 @@ vostra-invoice-web/
 │   ├── vite.config.js            # Vite config (base: '/vostra-invoice/')
 │   ├── tsconfig.json             # TypeScript configuration
 │   └── Dockerfile                # Multi-stage Docker build
-├── backend/                       # Backend services 🚧 PLANNED
-│   ├── api/                      # Main API service (FastAPI)
+├── backend/                       # Backend services
+│   ├── api/                      # Main API service (FastAPI) ✅ Phase 1
 │   │   ├── app/
 │   │   │   ├── models/          # SQLAlchemy ORM models
 │   │   │   ├── schemas/         # Pydantic schemas
-│   │   │   ├── api/routes/      # API endpoints
-│   │   │   └── services/        # Business logic
+│   │   │   ├── services/        # File upload, business logic
+│   │   │   └── utils/           # Validators, helpers
 │   │   ├── alembic/             # Database migrations
-│   │   └── Dockerfile
-│   └── ai-extractor/             # AI extraction service (FastAPI)
-│       ├── app/
-│       │   └── services/        # GPT-4 Vision integration
-│       └── Dockerfile
+│   │   └── requirements.txt
+│   ├── ai-extractor/             # AI extraction service (FastAPI) ✅ Phase 2
+│   │   ├── app/
+│   │   │   ├── services/        # GPT-5 Vision integration
+│   │   │   └── utils/           # File loaders
+│   │   └── requirements.txt
+│   └── docker-compose.dev.yml   # Local PostgreSQL
 ├── landing/                       # Root landing page ✅ LIVE
 │   ├── index.html
 │   ├── nginx.conf
@@ -87,6 +91,8 @@ vostra-invoice-web/
 │   └── ingress.yaml              # Traefik ingress with SSL
 ├── cc/                            # Planning and documentation
 │   ├── invoice-upload-implementation-plan.md  # 📋 Backend roadmap
+│   ├── phase-2-manual-testing.md  # 🧪 Phase 2 testing guide
+│   ├── testing-strategy.md       # MVP testing approach
 │   ├── ground-truth-schema.json  # Invoice data schema
 │   ├── overall-system-description.md
 │   └── core-rules.md             # Development principles
@@ -114,42 +120,31 @@ vostra-invoice-web/
 
 ## Local Development
 
-### Backend Development (NEW - Phase 1)
+### Backend Development
 
-**1. Start PostgreSQL:**
-```bash
-cd backend
-docker-compose -f docker-compose.dev.yml up -d
-```
+**Phase 1 (vostra-api) - Complete ✅**
 
-**2. Create `.env` file:**
-```bash
-cd backend/api
-cp .env.example .env
-# Edit .env if needed (defaults should work for local dev)
-```
+1. Start PostgreSQL: `cd backend && docker-compose -f docker-compose.dev.yml up -d`
+2. Setup environment: `cd backend/api && cp .env.example .env`
+3. Install deps: `pip install -r requirements.txt` (use venv recommended)
+4. Run migrations: `alembic upgrade head`
+5. Start server: `uvicorn app.main:app --reload --port 8000`
+6. API docs: http://localhost:8000/docs
 
-**3. Install dependencies:**
-```bash
-cd backend/api
-pip install -r requirements.txt
-```
+**Phase 2 (vostra-ai-extractor) - Complete ✅**
 
-**4. Run database migrations:**
-```bash
-cd backend/api
-alembic upgrade head
-```
+See `cc/phase-2-manual-testing.md` for full testing guide (PowerShell).
 
-**5. Start FastAPI server:**
-```bash
-cd backend/api
-uvicorn app.main:app --reload --port 8000
-```
+Quick start:
+1. Setup venv: `cd backend/ai-extractor && python -m venv venv && .\venv\Scripts\Activate.ps1`
+2. Install: `pip install -r requirements.txt`
+3. Configure: `cp .env.example .env` (add your OPENAI_API_KEY)
+4. Start: `uvicorn app.main:app --reload --port 8001`
+5. Test: http://localhost:8001/docs
 
-The API will be available at `http://localhost:8000`
+**Phase 3 (Integration) - Next**
 
-**API Documentation:** `http://localhost:8000/docs` (Swagger UI)
+Connect vostra-api to ai-extractor service.
 
 ### Frontend Development
 
@@ -450,24 +445,25 @@ Ensure these are set (one-time setup):
 
 ## Backend Implementation
 
-See **`cc/invoice-upload-implementation-plan.md`** for the complete backend roadmap including:
+### Progress
 
-- Two-service architecture (vostra-api + vostra-ai-extractor)
-- PostgreSQL schema design
-- OpenAI GPT-4 Vision integration
-- Kubernetes deployment configuration
-- 6 implementation phases with detailed tasks
+- ✅ **Phase 1 (vostra-api)**: Database, models, file storage
+- ✅ **Phase 2 (vostra-ai-extractor)**: GPT-5 Vision integration
+- 🚧 **Phase 3 (Integration)**: Connect services - NEXT
+- 📋 **Phase 4-6**: Additional endpoints, frontend, deployment
 
-### Architecture Preview
+See **`cc/invoice-upload-implementation-plan.md`** for complete roadmap.
+
+### Architecture
 
 ```
 React Frontend
     ↓
-vostra-api (FastAPI)
-    ├── PostgreSQL (invoices, raw_ai_data, user_validated_data)
-    ├── File Storage (PVC)
-    └── → vostra-ai-extractor (FastAPI)
-              └── OpenAI GPT-4 Vision API
+vostra-api (FastAPI) ✅
+    ├── PostgreSQL (invoices, raw_ai_data, user_validated_data) ✅
+    ├── File Storage ✅
+    └── → vostra-ai-extractor (FastAPI) ✅
+              └── OpenAI GPT-5 Vision API ✅
                   (later: local LLM)
 ```
 

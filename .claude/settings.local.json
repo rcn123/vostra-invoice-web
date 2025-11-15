@@ -51,7 +51,8 @@
       "Bash(docker-compose:*)",
       "Bash(docker stop:*)",
       "Bash(docker rm:*)",
-      "Bash(docker start:*)"
+      "Bash(docker start:*)",
+      "Bash(touch:*)"
     ],
     "deny": [],
     "ask": []
