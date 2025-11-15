@@ -15,7 +15,10 @@ Public marketing website and demo for VostraInvoice - AI-powered invoice process
 
 ### 🚧 In Development
 - **Backend API**: FastAPI service for file upload and database ✅ Phase 1 complete
-- **AI Extraction**: GPT-5 Vision integration for PDF/image processing ✅ Phase 2 complete
+- **AI Extraction**: OpenAI Vision (GPT-4o/GPT-5) with PDF support ✅ Phase 2 complete
+  - Modular extractors for easy model swapping
+  - PyMuPDF for PDF→PNG conversion
+  - Tested with real Swedish invoices
 - **Service Integration**: Connect vostra-api to ai-extractor (Phase 3 next)
 - See `cc/invoice-upload-implementation-plan.md` for roadmap
 
@@ -42,11 +45,14 @@ Try the live demo at https://vostra.ai/vostra-invoice/
 
 ### Backend (In Development)
 - **API Service**: FastAPI (Python 3.11) ✅ Phase 1 complete
-- **AI Extraction**: Separate FastAPI service with OpenAI GPT-5 Vision ✅ Phase 2 complete
+- **AI Extraction**: Separate FastAPI service ✅ Phase 2 complete
+  - Modular architecture (GPT-4o / GPT-5)
+  - PDF→PNG conversion via PyMuPDF
+  - Comprehensive Swedish extraction prompt
 - **Database**: PostgreSQL 15 with JSONB ✅ Phase 1 complete
 - **File Storage**: Local development ready, K8s PVC planned
 - **Next**: Service integration (Phase 3)
-- **Future**: Local LLM (swappable from GPT-5)
+- **Future**: Local LLM (easy swap via modular design)
 
 ## Project Structure
 
@@ -72,9 +78,9 @@ vostra-invoice-web/
 │   │   └── requirements.txt
 │   ├── ai-extractor/             # AI extraction service (FastAPI) ✅ Phase 2
 │   │   ├── app/
-│   │   │   ├── services/        # GPT-5 Vision integration
-│   │   │   └── utils/           # File loaders
-│   │   └── requirements.txt
+│   │   │   ├── services/        # Modular extractors (GPT-4o, GPT-5)
+│   │   │   └── utils/           # PDF converter, file loaders
+│   │   └── requirements.txt     # Includes PyMuPDF
 │   └── docker-compose.dev.yml   # Local PostgreSQL
 ├── landing/                       # Root landing page ✅ LIVE
 │   ├── index.html
@@ -133,14 +139,18 @@ vostra-invoice-web/
 
 **Phase 2 (vostra-ai-extractor) - Complete ✅**
 
-See `cc/phase-2-manual-testing.md` for full testing guide (PowerShell).
+Features:
+- Modular extractors (GPT-4o via Chat API, GPT-5 via Responses API)
+- PDF support via PyMuPDF (PDF→PNG conversion)
+- Comprehensive Swedish extraction prompt
+- Easy model switching via .env config
 
 Quick start:
 1. Setup venv: `cd backend/ai-extractor && python -m venv venv && .\venv\Scripts\Activate.ps1`
-2. Install: `pip install -r requirements.txt`
-3. Configure: `cp .env.example .env` (add your OPENAI_API_KEY)
+2. Install: `pip install -r requirements.txt` (includes PyMuPDF)
+3. Configure: `cp .env.example .env` (add OPENAI_API_KEY, set OPENAI_MODEL=gpt-4o)
 4. Start: `uvicorn app.main:app --reload --port 8001`
-5. Test: http://localhost:8001/docs
+5. Test: http://localhost:8001/docs (upload PDF invoices directly)
 
 **Phase 3 (Integration) - Next**
 
@@ -448,7 +458,7 @@ Ensure these are set (one-time setup):
 ### Progress
 
 - ✅ **Phase 1 (vostra-api)**: Database, models, file storage
-- ✅ **Phase 2 (vostra-ai-extractor)**: GPT-5 Vision integration
+- ✅ **Phase 2 (vostra-ai-extractor)**: OpenAI Vision (GPT-4o/GPT-5) + PDF support
 - 🚧 **Phase 3 (Integration)**: Connect services - NEXT
 - 📋 **Phase 4-6**: Additional endpoints, frontend, deployment
 

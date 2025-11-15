@@ -123,6 +123,7 @@
           "description": "VAT breakdown by rate"
         },
         "vat_amount": {"type": "number", "description": "Total VAT amount"},
+        "rounding_adjustment": {"type": "number", "description": "Öresutjämning (rounding adjustment to nearest whole currency unit)"},
         "total": {"type": "number", "description": "Total amount including VAT"},
         "currency": {"type": "string", "default": "SEK", "description": "Currency code (ISO 4217)"},
 

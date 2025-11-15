@@ -1,6 +1,6 @@
 # Claude Code Session Guide
 
-**Last Updated:** 2025-11-14 (Phase 2 Complete)
+**Last Updated:** 2025-11-15 (Phase 2 Complete + PDF Support)
 **Project:** VostraInvoice - AI-powered invoice processing for Swedish municipalities
 
 ---
@@ -51,14 +51,15 @@
    - **Storage path**: `/storage/vostra-invoice-web/uploads` (namespaced)
 
 5. **Backend Phase 2: vostra-ai-extractor** ✅
-   - **Directory structure**: `backend/ai-extractor/` with FastAPI app
-   - **OpenAI GPT-5 Vision**: Integration for invoice extraction
-   - **File loader**: Base64 encoding for Vision API
-   - **Extraction prompt**: Swedish invoice JSON schema
+   - **Directory structure**: `backend/ai-extractor/` with modular FastAPI app
+   - **Modular extractors**: Separate GPT-4o and GPT-5 implementations
+   - **PDF support**: PyMuPDF converts PDF→PNG for Vision API
+   - **Model routing**: Auto-selects extractor based on OPENAI_MODEL config
+   - **Comprehensive prompt**: Swedish invoice extraction with all fields
    - **Endpoints**: `/`, `/health`, `/extract`
-   - **Configuration**: OPENAI_API_KEY, model=gpt-5
+   - **Configuration**: OPENAI_API_KEY, model=gpt-4o or gpt-5
    - **Storage**: Same path as vostra-api for file access
-   - **Testing guide**: `cc/phase-2-manual-testing.md` (PowerShell + venv)
+   - **Testing**: Verified with real PDF invoices ✅
 
 ### 🚧 Next Phase
 
@@ -87,10 +88,10 @@ vostra-api (FastAPI) ✅
 └── Validators: File type/size checks
 
 vostra-ai-extractor (FastAPI) ✅
-├── OpenAI GPT-5 Vision integration
-├── Base64 file loader
+├── Modular extractor (GPT-4o / GPT-5)
+├── PDF→PNG conversion (PyMuPDF)
 ├── /extract endpoint
-└── Ground-truth JSON schema prompt
+└── Comprehensive Swedish prompt
 ```
 
 ### Next: Integration (Phase 3)
@@ -146,9 +147,12 @@ vostra-api (FastAPI) ✅
 **vostra-ai-extractor (Phase 2):**
 - `backend/ai-extractor/app/main.py` - FastAPI application
 - `backend/ai-extractor/app/config.py` - OpenAI configuration
-- `backend/ai-extractor/app/services/openai_extractor.py` - GPT-5 Vision
+- `backend/ai-extractor/app/services/openai_extractor.py` - Model router
+- `backend/ai-extractor/app/services/gpt4_extractor.py` - GPT-4o implementation
+- `backend/ai-extractor/app/services/gpt5_extractor.py` - GPT-5 implementation
 - `backend/ai-extractor/app/utils/file_loader.py` - Base64 file loading
-- `backend/ai-extractor/requirements.txt` - Dependencies
+- `backend/ai-extractor/app/utils/pdf_converter.py` - PDF→PNG converter
+- `backend/ai-extractor/requirements.txt` - Dependencies (incl. PyMuPDF)
 
 ### Kubernetes & Deployment
 - `k8s/` - All Kubernetes manifests
@@ -169,7 +173,9 @@ vostra-api (FastAPI) ✅
 - **FastAPI** (Python 3.11) ✅
 - **PostgreSQL 15** with JSONB fields ✅
 - **SQLAlchemy** + Alembic migrations (timestamptz) ✅
-- **OpenAI GPT-5 Vision** API ✅ (later: local LLM)
+- **OpenAI Vision API** (GPT-4o / GPT-5) ✅
+- **PyMuPDF** for PDF→PNG conversion ✅
+- **Modular extractors** for easy model swapping ✅
 - **Virtual environments** (venv) for isolation ✅
 - **Kubernetes** deployment - Phase 6 (planned)
 
@@ -229,9 +235,11 @@ See **`cc/invoice-upload-implementation-plan.md`** for complete roadmap.
 
 ### ✅ Phase 2: AI Extractor (Complete)
 - ✅ Created `backend/ai-extractor/` structure
-- ✅ Integrated OpenAI GPT-5 Vision
+- ✅ Integrated OpenAI Vision (GPT-4o + GPT-5)
 - ✅ Implemented `/extract` endpoint
-- ✅ Created manual testing guide
+- ✅ Added PDF→PNG conversion (PyMuPDF)
+- ✅ Created modular extractor architecture
+- ✅ Tested with real PDF invoices
 
 ### 🚧 Phase 3: Service Integration (Next)
 - Create AI client in vostra-api
@@ -257,7 +265,9 @@ See **`cc/invoice-upload-implementation-plan.md`** for complete roadmap.
 ✅ **Backend API foundation (vostra-api)**
 ✅ **AI extraction service (vostra-ai-extractor)**
 ✅ **PostgreSQL database with invoice schema**
-✅ **OpenAI GPT-5 Vision integration**
+✅ **OpenAI Vision integration (GPT-4o + GPT-5)**
+✅ **PDF extraction via PyMuPDF conversion**
+✅ **Modular extractor architecture for model swapping**
 
 ### What Still Needs Implementation
 ❌ Upload endpoint (connect frontend → API → AI extractor)

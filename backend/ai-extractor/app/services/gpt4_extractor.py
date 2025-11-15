@@ -93,6 +93,7 @@ Förväntad struktur:
     }
   ],
   "vat_amount": 0.0,
+  "rounding_adjustment": 0.0,
   "total": 0.0,
   "currency": "SEK",
 
@@ -104,7 +105,11 @@ Förväntad struktur:
   "period": "Faktureringsperiod"
 }
 
-VIKTIGT: Extrahera ALLA fakturarader. Beräkna totaler noggrant. Var noggrann med alla siffror.
+VIKTIGT:
+- Extrahera ALLA fakturarader
+- Beräkna totaler noggrant
+- Var noggrann med alla siffror
+- Leta efter "Öresutjämning" eller "Avrundning" och extrahera detta som "rounding_adjustment" fält
 """
 
 
