@@ -13,14 +13,20 @@ Public marketing website and demo for VostraInvoice - AI-powered invoice process
 - **Deployment**: Auto-deploy via GitHub Actions to Kubernetes
 - **SSL/HTTPS**: Let's Encrypt with auto-renewal
 
-### 🚧 In Development
-- **Backend API**: FastAPI service for file upload and database ✅ Phase 1 complete
-- **AI Extraction**: OpenAI Vision (GPT-4o/GPT-5) with PDF support ✅ Phase 2 complete
+### ✅ Backend Operational in Production
+- **API Service**: FastAPI with PostgreSQL ✅ Live at https://vostra.ai/api
+- **AI Extraction**: OpenAI GPT-4o Vision with PDF support ✅ Working
   - Modular extractors for easy model swapping
   - PyMuPDF for PDF→PNG conversion
-  - Tested with real Swedish invoices
-- **Service Integration**: Connect vostra-api to ai-extractor (Phase 3 next)
+  - Tested with real Swedish invoices in production
+- **Service Integration**: vostra-api ↔ ai-extractor ✅ Phase 3 complete
+- **Upload Endpoint**: POST /api/invoices/upload ✅ Fully functional
+- **Production Secrets**: Template-based, declarative management
 - See `cc/invoice-upload-implementation-plan.md` for roadmap
+
+### 🚧 In Development
+- **Additional Endpoints**: GET /invoices, approve workflow (Phase 4)
+- **Frontend Integration**: Connect React app to real API (Phase 5)
 
 ## Demo Features
 
@@ -43,15 +49,16 @@ Try the live demo at https://vostra.ai/vostra-invoice/
 - **SSL**: Let's Encrypt via cert-manager (auto-renewal)
 - **CI/CD**: GitHub Actions → Auto-deploy to k8s
 
-### Backend (In Development)
-- **API Service**: FastAPI (Python 3.11) ✅ Phase 1 complete
-- **AI Extraction**: Separate FastAPI service ✅ Phase 2 complete
+### Backend (Production)
+- **API Service**: FastAPI (Python 3.11) ✅ Phase 3 complete - LIVE
+- **AI Extraction**: Separate FastAPI service ✅ Phase 3 complete - WORKING
   - Modular architecture (GPT-4o / GPT-5)
   - PDF→PNG conversion via PyMuPDF
   - Comprehensive Swedish extraction prompt
-- **Database**: PostgreSQL 15 with JSONB ✅ Phase 1 complete
-- **File Storage**: Local development ready, K8s PVC planned
-- **Next**: Service integration (Phase 3)
+- **Database**: PostgreSQL 15 with JSONB ✅ Deployed in Kubernetes
+- **File Storage**: RWO PersistentVolumeClaim (k3s local-path)
+- **Secrets**: Template-based declarative management with base64 encoding
+- **Next**: Additional CRUD endpoints (Phase 4)
 - **Future**: Local LLM (easy swap via modular design)
 
 ## Project Structure

@@ -1,13 +1,13 @@
 # Claude Code Session Guide
 
-**Last Updated:** 2025-11-15 (Phase 2 Complete + PDF Support)
+**Last Updated:** 2025-11-15 (Phase 3 Complete - Backend Fully Operational)
 **Project:** VostraInvoice - AI-powered invoice processing for Swedish municipalities
 
 ---
 
 ## Current Status
 
-### ✅ Completed (as of 2025-11-14)
+### ✅ Completed (as of 2025-11-15)
 
 1. **Frontend Demo Application** (React + TypeScript + Tailwind)
    - Full TypeScript conversion completed
@@ -61,51 +61,63 @@
    - **Storage**: Same path as vostra-api for file access
    - **Testing**: Verified with real PDF invoices ✅
 
+6. **Backend Phase 3: Service Integration & Production Deployment** ✅
+   - **Upload endpoint**: POST /api/invoices/upload (fully functional)
+   - **AI client**: HTTP integration between vostra-api ↔ vostra-ai-extractor
+   - **End-to-end flow**: Upload → Storage → DB → AI Extraction → Response
+   - **Production deployment**:
+     - Template-based secret management (declarative, GitOps-aligned)
+     - Base64 encoding to handle special characters in secrets
+     - Fail-fast error checking in deployment workflow
+     - Kubernetes namespace: `vostra-invoice-web`
+     - RWO storage (k3s local-path limitation)
+     - Single replicas for API and AI extractor
+   - **Live API**: https://vostra.ai/api/health ✅
+   - **Tested**: Real invoice extraction working in production ✅
+
 ### 🚧 Next Phase
 
-**Phase 3: Service Integration** - See plan: `cc/invoice-upload-implementation-plan.md`
+**Phase 4: Additional API Endpoints** - See plan: `cc/invoice-upload-implementation-plan.md`
 
-Connect the two services:
-1. **vostra-api** (FastAPI): ✅ Complete
-2. **vostra-ai-extractor** (FastAPI): ✅ Complete
-3. **Integration**: 🚧 Next - Upload endpoint calls AI extractor
+Implement remaining CRUD operations:
+1. GET /api/invoices/{id} - Retrieve single invoice
+2. GET /api/invoices - List invoices with pagination and filtering
+3. POST /api/invoices/{id}/approve - User approval workflow
+4. Enhanced health check with DB and AI extractor connectivity
 
 ---
 
 ## Architecture Overview
 
-### Current (Frontend + Backend Services Ready)
+### Current (Full Backend Operational in Production)
 ```
 React Frontend (TypeScript)
 ├── Mock Invoice Data
 ├── Demo Pages (List, Detail, Upload)
 └── XAI Features (Explainability)
+    ↓ (Phase 5: Connect to real API)
 
-vostra-api (FastAPI) ✅
-├── Database: PostgreSQL (vostra-invoice-web)
-├── Models: Invoice ORM with JSONB
-├── File Storage: Upload/save utilities
-└── Validators: File type/size checks
+Production API (https://vostra.ai/api) ✅
+│
+vostra-api (FastAPI) - Deployed ✅
+    ├── PostgreSQL Database (vostra-invoice-web) ✅
+    ├── File Storage (/storage/vostra-invoice-web/uploads) ✅
+    ├── POST /api/invoices/upload ✅ WORKING
+    ├── GET /api/health ✅ WORKING
+    ├── TODO: GET /api/invoices (list with pagination)
+    ├── TODO: GET /api/invoices/{id} (single invoice)
+    ├── TODO: POST /api/invoices/{id}/approve (user validation)
+    └── → vostra-ai-extractor (FastAPI) ✅ WORKING
+              ├── GPT-4o Vision (production) ✅
+              ├── PDF→PNG conversion ✅
+              └── Swedish invoice extraction ✅
 
-vostra-ai-extractor (FastAPI) ✅
-├── Modular extractor (GPT-4o / GPT-5)
-├── PDF→PNG conversion (PyMuPDF)
-├── /extract endpoint
-└── Comprehensive Swedish prompt
-```
-
-### Next: Integration (Phase 3)
-```
-React Frontend
-    ↓
-vostra-api (FastAPI) ✅
-    ├── PostgreSQL Database ✅
-    ├── File Storage ✅
-    ├── TODO: POST /api/invoices/upload (calls AI extractor)
-    ├── TODO: POST /api/invoices/{id}/approve
-    └── → vostra-ai-extractor (FastAPI) ✅
-              └── OpenAI GPT-5 Vision ✅
-                  (later: local LLM)
+Kubernetes (k3s on Hetzner) ✅
+├── Namespace: vostra-invoice-web
+├── Pods: postgres, vostra-api, vostra-ai-extractor (all Running)
+├── Secrets: Template-based management with base64 encoding
+├── Storage: RWO PersistentVolumeClaims
+└── Ingress: Traefik with Let's Encrypt SSL
 ```
 
 ---
@@ -241,9 +253,16 @@ See **`cc/invoice-upload-implementation-plan.md`** for complete roadmap.
 - ✅ Created modular extractor architecture
 - ✅ Tested with real PDF invoices
 
-### 🚧 Phase 3: Service Integration (Next)
-- Create AI client in vostra-api
-- Implement POST /api/invoices/upload endpoint
+### ✅ Phase 3: Service Integration (Complete)
+- ✅ Created AI client in vostra-api
+- ✅ Implemented POST /api/invoices/upload endpoint
+- ✅ Production deployment with template-based secrets
+- ✅ End-to-end tested in production
+
+### 🚧 Phase 4: Additional API Endpoints (Next)
+- GET /api/invoices - List with pagination
+- GET /api/invoices/{id} - Single invoice
+- POST /api/invoices/{id}/approve - User approval
 - Connect upload flow to AI extractor
 - Add status tracking (uploaded→extracting→extracted)
 
