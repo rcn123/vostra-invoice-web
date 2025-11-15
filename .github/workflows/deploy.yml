@@ -35,12 +35,22 @@ jobs:
             # Create/Update Kubernetes secrets from template (declarative, production-grade)
             export DATABASE_URL="postgresql://vostra:${DB_PASSWORD}@postgres:5432/vostra-invoice-web"
 
+            echo "Creating backend secrets..."
+            if [ ! -f k8s/backend-secrets.yaml.tpl ]; then
+              echo "ERROR: Template file k8s/backend-secrets.yaml.tpl not found!"
+              exit 1
+            fi
+
             sed \
               -e "s|\${DB_PASSWORD}|${DB_PASSWORD}|g" \
               -e "s|\${OPENAI_API_KEY}|${OPENAI_API_KEY}|g" \
               -e "s|\${DATABASE_URL}|${DATABASE_URL}|g" \
               k8s/backend-secrets.yaml.tpl \
-              | kubectl apply -f -
+              | kubectl apply -f - || { echo "ERROR: Failed to create backend secrets!"; exit 1; }
+
+            echo "Verifying secret was created..."
+            kubectl get secret backend-secrets -n vostra-invoice-web || { echo "ERROR: Secret was not created!"; exit 1; }
+            echo "✓ Backend secrets created successfully"
 
             # Build Docker images
             docker build -t vostra-landing:v1 ./landing
