@@ -35,6 +35,11 @@ jobs:
             # Create/Update Kubernetes secrets from template (declarative, production-grade)
             export DATABASE_URL="postgresql://vostra:${DB_PASSWORD}@postgres:5432/vostra-invoice-web"
 
+            # Base64 encode secrets to avoid YAML escaping issues
+            export DB_PASSWORD_B64=$(echo -n "${DB_PASSWORD}" | base64 -w 0)
+            export OPENAI_API_KEY_B64=$(echo -n "${OPENAI_API_KEY}" | base64 -w 0)
+            export DATABASE_URL_B64=$(echo -n "${DATABASE_URL}" | base64 -w 0)
+
             echo "Creating backend secrets..."
             if [ ! -f k8s/backend-secrets.yaml.tpl ]; then
               echo "ERROR: Template file k8s/backend-secrets.yaml.tpl not found!"
@@ -42,9 +47,9 @@ jobs:
             fi
 
             sed \
-              -e "s|\${DB_PASSWORD}|${DB_PASSWORD}|g" \
-              -e "s|\${OPENAI_API_KEY}|${OPENAI_API_KEY}|g" \
-              -e "s|\${DATABASE_URL}|${DATABASE_URL}|g" \
+              -e "s|\${DB_PASSWORD_B64}|${DB_PASSWORD_B64}|g" \
+              -e "s|\${OPENAI_API_KEY_B64}|${OPENAI_API_KEY_B64}|g" \
+              -e "s|\${DATABASE_URL_B64}|${DATABASE_URL_B64}|g" \
               k8s/backend-secrets.yaml.tpl \
               | kubectl apply -f - || { echo "ERROR: Failed to create backend secrets!"; exit 1; }
 
