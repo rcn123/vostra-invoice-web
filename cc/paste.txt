@@ -1,15 +1,68 @@
-{
-  "id": 1,
-  "created_at": "2025-11-15T16:37:48.280091Z",
-  "updated_at": "2025-11-15T16:37:48.299212Z",
-  "extracted_at": null,
-  "approved_at": null,
-  "status": "failed",
-  "original_filename": "120 3499152.pdf",
-  "file_type": "pdf",
-  "file_path": "2025/11/15/ffae7c4d-6759-4585-8341-abbdc93ae639_120 3499152.pdf",
-  "file_size": 9386,
-  "raw_ai_data": null,
-  "user_validated_data": null,
-  "error_message": "AI extraction failed: {\"detail\":\"GPT-4 extraction failed: Connection error.\"}"
-}
+Error on step "Deploy to Hetzner Kubernetes"
+
+'
+3s
+
+
+Run ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ***@*** << 'EOF'
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.8.0-71-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Sat Nov 15 05:48:50 PM UTC 2025
+
+  System load:  0.05               Processes:             222
+  Usage of /:   30.9% of 74.79GB   Users logged in:       0
+  Memory usage: 26%                IPv4 address for eth0: ***
+  Swap usage:   0%                 IPv6 address for eth0: 2a01:4f9:c010:d3ef::1
+
+ * Strictly confined Kubernetes makes edge and IoT secure. Learn how MicroK8s
+   just raised the bar for easy, resilient and secure K8s cluster deployment.
+
+   https://ubuntu.com/engage/secure-kubernetes-at-the-edge
+
+Expanded Security Maintenance for Applications is not enabled.
+
+31 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+*** System restart required ***
+From https://github.com/rcn123/vostra-invoice-web
+ * branch            main       -> FETCH_HEAD
+   a0a41b7..c368e45  main       -> origin/main
+Updating a0a41b7..c368e45
+Fast-forward
+ backend/.env.example                               |  8 ++
+ backend/ai-extractor/.env.example                  | 13 ---
+ backend/ai-extractor/Dockerfile.dev                | 19 +++++
+ .../ai-extractor/app/services/gpt4_extractor.py    |  7 +-
+ .../ai-extractor/app/services/gpt5_extractor.py    |  7 +-
+ backend/api/.env.example                           | 11 ---
+ backend/api/Dockerfile.dev                         | 27 +++++++
+ backend/api/alembic/env.py                         |  5 ++
+ backend/api/app/api/routes/invoices.py             | 92 ++++++++++++++++++++++
+ backend/api/app/main.py                            |  8 +-
+ backend/api/app/services/ai_client.py              | 52 ++++++++++++
+ backend/api/app/utils/validators.py                | 14 ++++
+ backend/docker-compose.dev.yml                     | 56 ++++++++++++-
+ cc/ground-truth-schema.json                        |  1 +
+ cc/paste.txt                                       | 35 ++++----
+ claude.md                                          | 42 ++++++----
+ readme.md                                          | 32 +++++---
+ 17 files changed, 349 insertions(+), 80 deletions(-)
+ create mode 100644 backend/.env.example
+ delete mode 100644 backend/ai-extractor/.env.example
+ create mode 100644 backend/ai-extractor/Dockerfile.dev
+ delete mode 100644 backend/api/.env.example
+ create mode 100644 backend/api/Dockerfile.dev
+ create mode 100644 backend/api/app/api/routes/invoices.py
+ create mode 100644 backend/api/app/services/ai_client.py
+-bash: line 11: unexpected EOF while looking for matching `''
+Error: Process completed with exit code 2.
