@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code (will be overridden by volume mount for hot reload)
+COPY app ./app
+
+# Create storage directory
+RUN mkdir -p /storage/vostra-invoice-web/uploads
+
+# Expose port
+EXPOSE 8001
+
+# Command will be overridden by docker-compose
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]

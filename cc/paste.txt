@@ -1,22 +1,15 @@
-
-
-
-this is my POST request fir the /extract endpoint using Swagger:
 {
-  "invoice_id": 1,
-  "file_path": "2025/11/14/(250707-1) ECIT_32944_21 983,00.pdf"
-
+  "id": 1,
+  "created_at": "2025-11-15T16:37:48.280091Z",
+  "updated_at": "2025-11-15T16:37:48.299212Z",
+  "extracted_at": null,
+  "approved_at": null,
+  "status": "failed",
+  "original_filename": "120 3499152.pdf",
+  "file_type": "pdf",
+  "file_path": "2025/11/15/ffae7c4d-6759-4585-8341-abbdc93ae639_120 3499152.pdf",
+  "file_size": 9386,
+  "raw_ai_data": null,
+  "user_validated_data": null,
+  "error_message": "AI extraction failed: {\"detail\":\"GPT-4 extraction failed: Connection error.\"}"
 }
-
-
-
-Here is my test invoice:
-C:\Users\Robert\source\repos\vostra-invoice-web\backend\ai-extractor\storage\vostra-invoice-web\uploads\2025\11\14\(250707-1) ECIT_32944_21 983,00.pdf
-
-getting 
-404
-{
-  "detail": "File not found: 2025/11/14/(250707-1) ECIT_32944_21 983,00.pdf"
-}
-
-How can I specify the correct path in py request?

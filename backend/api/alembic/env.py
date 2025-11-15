@@ -1,4 +1,5 @@
 from logging.config import fileConfig
+import os
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
@@ -11,6 +12,10 @@ from app.models.invoice import Invoice  # Import all models here
 
 # this is the Alembic Config object
 config = context.config
+
+# Override sqlalchemy.url from environment variable if present
+if os.getenv("DATABASE_URL"):
+    config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
 
 # Interpret the config file for Python logging
 if config.config_file_name is not None:

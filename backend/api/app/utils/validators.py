@@ -65,3 +65,17 @@ def sanitize_filename(filename: str) -> str:
         filename = filename[:250] + '.' + ext
 
     return filename
+
+
+def validate_file(file: UploadFile) -> None:
+    """
+    Validate uploaded file (type and size)
+
+    Args:
+        file: Uploaded file
+
+    Raises:
+        HTTPException: If file validation fails
+    """
+    validate_file_type(file)
+    validate_file_size(file)

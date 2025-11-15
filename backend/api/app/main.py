@@ -49,7 +49,7 @@ async def health_check():
     }
 
 
-# Import and include routers (will be added in next steps)
-# from app.api.routes import invoices, health
-# app.include_router(invoices.router, prefix="/api/invoices", tags=["invoices"])
-# app.include_router(health.router, prefix="/api", tags=["health"])
+# Import and include routers
+from app.api.routes import invoices
+
+app.include_router(invoices.router)
