@@ -1,75 +1,14 @@
-root@vostra-server:~# # Check if the secret exists
-  kubectl get secret backend-secrets -n vostra-invoice-web
+root@vostra-server:/var/www/vostra-invoice-web# kubectl get deployment vostra-ai-extractor -n vostra-invoice-web -o yaml | grep -A 2 "replicas:"
+  kubectl get pvc -n vostra-invoice-web
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+--
+  replicas: 2
+  unavailableReplicas: 2
+  updatedReplicas: 1
+NAME           STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+postgres-pvc   Bound    pvc-2b2e6275-3dba-415c-bd3d-00651d5fb0c7   5Gi        RWO            local-path     <unset>                 95m
+root@vostra-server:/var/www/vostra-invoice-web# 
 
-  # Describe the postgres pod to see the actual error
-  kubectl describe pod postgres-7ddf4fd5b7-jjf9k -n vostra-invoice-web
-Error from server (NotFound): secrets "backend-secrets" not found
-Name:             postgres-7ddf4fd5b7-jjf9k
-Namespace:        vostra-invoice-web
-Priority:         0
-Service Account:  default
-Node:             vostra-server/65.21.145.222
-Start Time:       Sat, 15 Nov 2025 19:16:07 +0000
-Labels:           app=postgres
-                  pod-template-hash=7ddf4fd5b7
-Annotations:      <none>
-Status:           Pending
-IP:               10.42.0.163
-IPs:
-  IP:           10.42.0.163
-Controlled By:  ReplicaSet/postgres-7ddf4fd5b7
-Containers:
-  postgres:
-    Container ID:   
-    Image:          postgres:15-alpine
-    Image ID:       
-    Port:           5432/TCP
-    Host Port:      0/TCP
-    State:          Waiting
-      Reason:       CreateContainerConfigError
-    Ready:          False
-    Restart Count:  0
-    Limits:
-      cpu:     500m
-      memory:  512Mi
-    Requests:
-      cpu:      200m
-      memory:   256Mi
-    Liveness:   exec [pg_isready -U vostra] delay=30s timeout=1s period=10s #success=1 #failure=3
-    Readiness:  exec [pg_isready -U vostra] delay=5s timeout=1s period=5s #success=1 #failure=3
-    Environment:
-      POSTGRES_DB:        vostra-invoice-web
-      POSTGRES_USER:      vostra
-      POSTGRES_PASSWORD:  <set to the key 'postgres-password' in secret 'backend-secrets'>  Optional: false
-    Mounts:
-      /var/lib/postgresql/data from postgres-storage (rw)
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-66tjv (ro)
-Conditions:
-  Type                        Status
-  PodReadyToStartContainers   True 
-  Initialized                 True 
-  Ready                       False 
-  ContainersReady             False 
-  PodScheduled                True 
-Volumes:
-  postgres-storage:
-    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
-    ClaimName:  postgres-pvc
-    ReadOnly:   false
-  kube-api-access-66tjv:
-    Type:                    Projected (a volume that contains injected data from multiple sources)
-    TokenExpirationSeconds:  3607
-    ConfigMapName:           kube-root-ca.crt
-    Optional:                false
-    DownwardAPI:             true
-QoS Class:                   Burstable
-Node-Selectors:              <none>
-Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
-                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
-Events:
-  Type     Reason     Age                   From               Message
-  ----     ------     ----                  ----               -------
-  Normal   Scheduled  18m                   default-scheduler  Successfully assigned vostra-invoice-web/postgres-7ddf4fd5b7-jjf9k to vostra-server
-  Normal   Pulled     2m56s (x74 over 18m)  kubelet            Container image "postgres:15-alpine" already present on machine
-  Warning  Failed     2m56s (x74 over 18m)  kubelet            Error: secret "backend-secrets" not found
-root@vostra-server:~# 
+
