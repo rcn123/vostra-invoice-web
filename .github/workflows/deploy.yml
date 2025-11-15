@@ -23,27 +23,23 @@ jobs:
           ssh-keygen -l -f ~/.ssh/id_ed25519
 
       - name: Deploy to Hetzner Kubernetes
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          # Base64 encode secrets to avoid shell escaping issues
-          DB_PASSWORD_B64=$(echo -n '${{ secrets.DB_PASSWORD }}' | base64)
-          OPENAI_API_KEY_B64=$(echo -n '${{ secrets.OPENAI_API_KEY }}' | base64)
-
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} "
+          # Create deployment script
+          cat > /tmp/deploy.sh << 'SCRIPT'
             cd /var/www/vostra-invoice-web
 
             # Pull latest code
             git pull origin main
 
-            # Decode secrets
-            DB_PASSWORD=\$(echo ${DB_PASSWORD_B64} | base64 -d)
-            OPENAI_API_KEY=\$(echo ${OPENAI_API_KEY_B64} | base64 -d)
-
             # Create/Update Kubernetes secrets from GitHub Secrets
             kubectl delete secret backend-secrets -n vostra-invoice --ignore-not-found=true
             kubectl create secret generic backend-secrets \
-              --from-literal=postgres-password=\"\${DB_PASSWORD}\" \
-              --from-literal=database-url=\"postgresql://vostra:\${DB_PASSWORD}@postgres:5432/vostra-invoice-web\" \
-              --from-literal=openai-api-key=\"\${OPENAI_API_KEY}\" \
+              --from-literal=postgres-password="${DB_PASSWORD}" \
+              --from-literal=database-url="postgresql://vostra:${DB_PASSWORD}@postgres:5432/vostra-invoice-web" \
+              --from-literal=openai-api-key="${OPENAI_API_KEY}" \
               -n vostra-invoice
 
             # Build Docker images
@@ -91,6 +87,12 @@ jobs:
             docker image prune -f
 
             # Show final status
-            echo '=== Deployment Status ==='
+            echo "=== Deployment Status ==="
             kubectl get pods -n vostra-invoice
-          "
+SCRIPT
+
+          # Copy script to remote server and execute
+          scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no /tmp/deploy.sh ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:/tmp/deploy.sh
+
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} \
+            "DB_PASSWORD='${DB_PASSWORD}' OPENAI_API_KEY='${OPENAI_API_KEY}' bash /tmp/deploy.sh && rm /tmp/deploy.sh"
