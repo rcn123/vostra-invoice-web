@@ -24,7 +24,10 @@ jobs:
 
       - name: Deploy to Hetzner Kubernetes
         run: |
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} << 'EOF'
+          DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+          OPENAI_API_KEY='${{ secrets.OPENAI_API_KEY }}'
+
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} << EOF
             cd /var/www/vostra-invoice-web
 
             # Pull latest code
@@ -33,9 +36,9 @@ jobs:
             # Create/Update Kubernetes secrets from GitHub Secrets
             kubectl delete secret backend-secrets -n vostra-invoice --ignore-not-found=true
             kubectl create secret generic backend-secrets \
-              --from-literal=postgres-password='${{ secrets.DB_PASSWORD }}' \
-              --from-literal=database-url='postgresql://vostra:${{ secrets.DB_PASSWORD }}@postgres:5432/vostra-invoice-web' \
-              --from-literal=openai-api-key='${{ secrets.OPENAI_API_KEY }}' \
+              --from-literal=postgres-password='${DB_PASSWORD}' \
+              --from-literal=database-url='postgresql://vostra:${DB_PASSWORD}@postgres:5432/vostra-invoice-web' \
+              --from-literal=openai-api-key='${OPENAI_API_KEY}' \
               -n vostra-invoice
 
             # Build Docker images
