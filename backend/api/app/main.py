@@ -49,6 +49,16 @@ async def health_check():
     }
 
 
+@app.get("/api/health")
+async def api_health_check():
+    """Health check endpoint with /api prefix for ingress compatibility"""
+    return {
+        "status": "healthy",
+        "database": "connected",
+        "ai_extractor": "not_configured"
+    }
+
+
 # Import and include routers
 from app.api.routes import invoices
 
