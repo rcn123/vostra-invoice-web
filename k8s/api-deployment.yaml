@@ -6,7 +6,7 @@ metadata:
   labels:
     app: vostra-api
 spec:
-  replicas: 2
+  replicas: 1  # Single replica due to RWO storage limitation
   selector:
     matchLabels:
       app: vostra-api

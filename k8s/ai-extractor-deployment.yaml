@@ -6,7 +6,7 @@ metadata:
   labels:
     app: vostra-ai-extractor
 spec:
-  replicas: 1
+  replicas: 1  # Single replica due to RWO storage limitation
   selector:
     matchLabels:
       app: vostra-ai-extractor
@@ -66,7 +66,7 @@ metadata:
   namespace: vostra-invoice-web
 spec:
   accessModes:
-    - ReadWriteMany  # Multiple pods can read/write (needed for API + AI extractor)
+    - ReadWriteOnce  # Single node access (k3s local-path limitation)
   resources:
     requests:
       storage: 10Gi
