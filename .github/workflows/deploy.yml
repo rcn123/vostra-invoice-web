@@ -13,22 +13,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.HETZNER_HOST }} >> ~/.ssh/known_hosts
-          echo "Key fingerprint:"
-          ssh-keygen -l -f ~/.ssh/id_ed25519
-
       - name: Deploy to Hetzner Kubernetes
+        uses: appleboy/ssh-action@v1.0.3
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          # Create deployment script
-          cat > /tmp/deploy.sh << 'SCRIPT'
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          envs: DB_PASSWORD,OPENAI_API_KEY
+          script: |
             cd /var/www/vostra-invoice-web
 
             # Pull latest code
@@ -89,10 +84,3 @@ jobs:
             # Show final status
             echo "=== Deployment Status ==="
             kubectl get pods -n vostra-invoice
-SCRIPT
-
-          # Copy script to remote server and execute
-          scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no /tmp/deploy.sh ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:/tmp/deploy.sh
-
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} \
-            "DB_PASSWORD='${DB_PASSWORD}' OPENAI_API_KEY='${OPENAI_API_KEY}' bash /tmp/deploy.sh && rm /tmp/deploy.sh"
