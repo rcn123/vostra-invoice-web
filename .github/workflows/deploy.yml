@@ -32,19 +32,15 @@ jobs:
             # Create namespace first
             kubectl apply -f k8s/namespace.yaml
 
-            # Create/Update Kubernetes secrets using kubectl apply (idempotent, fail-fast)
-            cat <<EOF | kubectl apply -f -
-            apiVersion: v1
-            kind: Secret
-            metadata:
-              name: backend-secrets
-              namespace: vostra-invoice-web
-            type: Opaque
-            stringData:
-              postgres-password: "${DB_PASSWORD}"
-              database-url: "postgresql://vostra:${DB_PASSWORD}@postgres:5432/vostra-invoice-web"
-              openai-api-key: "${OPENAI_API_KEY}"
-            EOF
+            # Create/Update Kubernetes secrets from template (declarative, production-grade)
+            export DATABASE_URL="postgresql://vostra:${DB_PASSWORD}@postgres:5432/vostra-invoice-web"
+
+            sed \
+              -e "s|\${DB_PASSWORD}|${DB_PASSWORD}|g" \
+              -e "s|\${OPENAI_API_KEY}|${OPENAI_API_KEY}|g" \
+              -e "s|\${DATABASE_URL}|${DATABASE_URL}|g" \
+              k8s/backend-secrets.yaml.tpl \
+              | kubectl apply -f -
 
             # Build Docker images
             docker build -t vostra-landing:v1 ./landing
