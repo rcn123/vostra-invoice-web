@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: vostra-api
-  namespace: vostra-invoice
+  namespace: vostra-invoice-web
   labels:
     app: vostra-api
 spec:

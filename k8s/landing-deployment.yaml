@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vostra-landing
-  namespace: vostra-invoice
+  namespace: vostra-invoice-web
   labels:
     app: vostra-landing
 spec:

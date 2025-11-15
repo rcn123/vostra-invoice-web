@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: vostra-ingress-default
-  namespace: vostra-invoice
+  namespace: vostra-invoice-web
   annotations:
     # HTTP only for catch-all (no TLS)
     traefik.ingress.kubernetes.io/router.entrypoints: web
