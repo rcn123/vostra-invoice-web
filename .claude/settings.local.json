@@ -55,7 +55,8 @@
       "Bash(touch:*)",
       "WebSearch",
       "Bash(find:*)",
-      "Bash(npm run generate-types:*)"
+      "Bash(npm run generate-types:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
