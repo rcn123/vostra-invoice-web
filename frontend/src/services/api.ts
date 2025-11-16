@@ -109,6 +109,26 @@ class ApiClient {
   }
 
   /**
+   * Delete invoice
+   */
+  async deleteInvoice(id: number): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/api/invoices/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Invoice not found');
+      }
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to delete invoice');
+    }
+
+    // 204 No Content - successful deletion
+    return;
+  }
+
+  /**
    * Health check
    */
   async healthCheck(): Promise<any> {

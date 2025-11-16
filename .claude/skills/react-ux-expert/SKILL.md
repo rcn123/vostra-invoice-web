@@ -50,15 +50,18 @@ Always start with a solid foundation:
    - Semantic: Success (green), warning (yellow), danger (red), info (blue)
    - Status colors: For invoice states, provider status, etc.
 
-2. **Typography Scale** - Clear hierarchy
-   - Display: Large headings (32-48px)
-   - Headings: H1-H6 (14-24px)
-   - Body: Regular text (14-16px)
-   - Small: Metadata, captions (12-13px)
+2. **Typography Scale** - Clear hierarchy (use rem units)
+   - Display: Large headings (text-3xl to text-5xl / 1.875-3rem)
+   - Headings: H1-H6 (text-sm to text-2xl / 0.875-1.5rem)
+   - Body: Regular text (text-sm to text-base / 0.875-1rem)
+   - Small: Metadata, captions (text-xs / 0.75rem)
+   - **Never use px for font sizes** - always use Tailwind text-* classes or rem units
 
-3. **Spacing System** - Consistent rhythm (4px base unit)
-   - Use 4, 8, 12, 16, 24, 32, 48, 64px
-   - Tailwind: p-1 through p-16
+3. **Spacing System** - Consistent rhythm (0.25rem base unit)
+   - Use Tailwind spacing scale: 1, 2, 3, 4, 6, 8, 12, 16, 24, 32
+   - Maps to rem: 0.25rem, 0.5rem, 0.75rem, 1rem, 1.5rem, 2rem, 3rem, 4rem, 6rem, 8rem
+   - Example: `p-4` (1rem), `mt-6` (1.5rem), `gap-8` (2rem)
+   - **Never use px for spacing** - always use Tailwind classes or rem units
 
 4. **Elevation/Shadows** - Subtle depth
    - Cards, modals, dropdowns need gentle shadows
@@ -153,8 +156,8 @@ export function InvoiceStatusBadge({ status }) {
 - Optional page actions
 
 #### Page Container
-- Consistent padding (24-32px)
-- Max width for readability
+- Consistent padding (p-6 to p-8 / 1.5-2rem)
+- Max width for readability (max-w-7xl)
 - Page title with actions
 - Content sections with clear hierarchy
 

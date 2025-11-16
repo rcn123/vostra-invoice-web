@@ -235,3 +235,50 @@ async def approve_invoice(
 
     # 6. Return updated invoice
     return invoice
+
+
+@router.delete("/{invoice_id}", status_code=204)
+async def delete_invoice(
+    invoice_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Delete invoice by ID
+
+    ⚠️ DEV ONLY: This endpoint will be removed/restricted in production.
+    Currently used for cleaning up test data during development.
+    In production, use soft delete (archive/status change) instead.
+
+    Args:
+        invoice_id: Invoice ID to delete
+
+    Returns:
+        204 No Content on success
+
+    Raises:
+        404: Invoice not found
+    """
+    # Retrieve invoice
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+
+    if not invoice:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Invoice with id {invoice_id} not found"
+        )
+
+    # Delete associated file from storage (if exists)
+    if invoice.file_path:
+        try:
+            file_service = FileService()
+            file_service.delete_file(invoice.file_path)
+        except Exception as e:
+            # Log but don't fail - file might already be deleted
+            print(f"Warning: Could not delete file {invoice.file_path}: {e}")
+
+    # Delete from database
+    db.delete(invoice)
+    db.commit()
+
+    # 204 No Content - successful deletion
+    return

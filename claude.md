@@ -11,16 +11,19 @@
 
 1. **Frontend Application - Connected to Real API** ✅ (React + TypeScript + Tailwind)
    - Full TypeScript conversion completed
-   - OpenAPI TypeScript type generation from backend
+   - OpenAPI TypeScript type generation from backend (`npm run generate-types`)
    - Type-safe API client using generated types
    - **InvoiceListPage**: Fetches invoices from GET /api/invoices
-   - **InvoiceDetailPage**: Fetches single invoice, approval workflow
+   - **InvoiceDetailPage**: Fetches single invoice, approval workflow, delete (dev only)
    - **UploadPage**: Real file upload to POST /api/invoices/upload
+   - **ErrorBoundary**: Graceful error handling with stack traces
+   - **Toast Notifications**: Modern notifications (no more alert boxes!)
    - AI suggestion system with multiple account options (per-line)
-   - XAI (Explainable AI) features:
+   - XAI (Explainable AI) features (ready for when AI suggestions are added):
      - Sannolikhet column with colored progress bars
      - Collapsible explanation box (matched words, history, uncertainty, basis)
      - Dynamic updates when account selection changes
+     - Graceful handling when AI suggestions missing
    - Traditional dropdown with confidence percentages
    - Loading states and error handling throughout
    - Demo layout with sidebar navigation and top bar
@@ -93,15 +96,18 @@
    - **Status flow**: `uploaded → extracting → extracted → approved` (or `extraction_failed`)
    - **Tested**: All endpoints working locally with docker-compose ✅
 
-7. **Backend Phase 5: Frontend Integration** ✅
+7. **Phase 5: Frontend Integration & UX Improvements** ✅ **TESTED & WORKING**
    - **OpenAPI Type Generation**: `npm run generate-types` from backend spec
    - **Type-Safe API Client**: `frontend/src/services/api.ts` using generated types
    - **InvoiceListPage**: Real data from GET /api/invoices with loading/error states
-   - **InvoiceDetailPage**: Real data from GET /api/invoices/{id}, approve workflow
-   - **UploadPage**: Real file upload to POST /api/invoices/upload with validation
+   - **InvoiceDetailPage**: Real data, approve workflow, delete button (dev only)
+   - **UploadPage**: Real file upload with client-side validation (type, size)
+   - **ErrorBoundary**: Catches React errors, shows helpful error page with stack trace
+   - **Toast Notifications**: Modern slide-in notifications (rem-based positioning)
+   - **DELETE /api/invoices/{id}** (DEV ONLY): Cleanup test data, deletes file + DB record
    - **Status display**: Shows uploaded/extracting/extracted/approved/extraction_failed
    - **Per-line account coding**: Swedish municipal standard preserved
-   - **Ready for testing**: All pages connected to backend API
+   - **Complete flow tested**: Upload → Extract → View → Approve → Delete ✅
 
 ### 🚧 Next Phase
 

@@ -1,18 +1,27 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { LineItem } from '../data/mockInvoices';
 import { useState, useEffect } from 'react';
 import DemoLayout from '../components/DemoLayout';
 import AccountDropdown from '../components/AccountDropdown';
 import { apiClient, type Invoice } from '../services/api';
+import Toast, { ToastType } from '../components/Toast';
+
+interface ToastMessage {
+  message: string;
+  type: ToastType;
+}
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [invoice, setInvoice] = useState<any | null>(null);
   const [lines, setLines] = useState<LineItem[]>([]);
   const [expandedExplanations, setExpandedExplanations] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [approving, setApproving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
 
   // Fetch invoice data on mount
   useEffect(() => {
@@ -130,14 +139,45 @@ export default function InvoiceDetailPage() {
 
       console.log('handleApproveInvoice: Invoice approved successfully:', updatedInvoice);
       setInvoice(updatedInvoice);
-      alert('Faktura godkänd!');
+      setToast({ message: 'Faktura godkänd!', type: 'success' });
     } catch (err) {
       console.error('handleApproveInvoice: Error approving invoice:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to approve invoice';
       setError(errorMessage);
-      alert(`Fel vid godkännande: ${errorMessage}`);
+      setToast({ message: `Fel vid godkännande: ${errorMessage}`, type: 'error' });
     } finally {
       setApproving(false);
+    }
+  };
+
+  const handleDeleteInvoice = async () => {
+    if (!invoice || !id) return;
+
+    // Confirmation dialog
+    if (!window.confirm(`Är du säker på att du vill radera faktura ${invoice.raw_ai_data?.invoice_number || id}?`)) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError(null);
+
+      console.log(`handleDeleteInvoice: Deleting invoice #${id}`);
+      await apiClient.deleteInvoice(parseInt(id));
+
+      console.log('handleDeleteInvoice: Invoice deleted successfully');
+      setToast({ message: 'Faktura raderad', type: 'success' });
+
+      // Navigate back to invoice list after short delay
+      setTimeout(() => {
+        navigate('/demo/invoices');
+      }, 1000);
+    } catch (err) {
+      console.error('handleDeleteInvoice: Error deleting invoice:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete invoice';
+      setError(errorMessage);
+      setToast({ message: `Fel vid radering: ${errorMessage}`, type: 'error' });
+      setDeleting(false);
     }
   };
 
@@ -156,14 +196,26 @@ export default function InvoiceDetailPage() {
   return (
     <DemoLayout>
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Breadcrumb */}
-        <div className="mb-6">
+        {/* Breadcrumb & Actions */}
+        <div className="mb-6 flex items-center justify-between">
           <Link
             to="/demo/invoices"
             className="text-blue-600 hover:text-blue-800 text-sm"
           >
             ← Tillbaka till fakturor
           </Link>
+          {/* ⚠️ DEV ONLY: Delete button for cleaning test data. Will be hidden/replaced in production. */}
+          <button
+            onClick={handleDeleteInvoice}
+            disabled={deleting}
+            className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
+              deleting
+                ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                : 'bg-red-600 hover:bg-red-700 text-white'
+            }`}
+          >
+            {deleting ? 'Raderar...' : 'Radera faktura'}
+          </button>
         </div>
 
         {/* Header */}
@@ -517,6 +569,15 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </DemoLayout>
   );
 }

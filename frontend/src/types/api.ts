@@ -120,7 +120,20 @@ export interface paths {
         get: operations["get_invoice_api_invoices__invoice_id__get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete Invoice
+         * @description Delete invoice by ID
+         *
+         *     Args:
+         *         invoice_id: Invoice ID to delete
+         *
+         *     Returns:
+         *         204 No Content on success
+         *
+         *     Raises:
+         *         404: Invoice not found
+         */
+        delete: operations["delete_invoice_api_invoices__invoice_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -396,6 +409,35 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["InvoiceResponse"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_invoice_api_invoices__invoice_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invoice_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
