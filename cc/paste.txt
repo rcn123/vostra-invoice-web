@@ -1,14 +1,2 @@
-root@vostra-server:/var/www/vostra-invoice-web# kubectl get deployment vostra-ai-extractor -n vostra-invoice-web -o yaml | grep -A 2 "replicas:"
-  kubectl get pvc -n vostra-invoice-web
-  replicas: 1
-  revisionHistoryLimit: 10
-  selector:
---
-  replicas: 2
-  unavailableReplicas: 2
-  updatedReplicas: 1
-NAME           STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
-postgres-pvc   Bound    pvc-2b2e6275-3dba-415c-bd3d-00651d5fb0c7   5Gi        RWO            local-path     <unset>                 95m
-root@vostra-server:/var/www/vostra-invoice-web# 
 
 

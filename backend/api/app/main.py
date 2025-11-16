@@ -1,7 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+import httpx
 from app.config import get_settings
-from app.database import engine, Base
+from app.database import engine, Base, get_db
 
 settings = get_settings()
 
@@ -40,23 +43,50 @@ async def root():
 
 
 @app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
+async def health_check(db: Session = Depends(get_db)):
+    """
+    Health check endpoint with real DB and AI extractor connectivity checks
+
+    Returns:
+        - status: overall status (healthy/degraded/unhealthy)
+        - database: DB connection status (connected/disconnected)
+        - ai_extractor: AI service status (reachable/unreachable/not_configured)
+    """
+    health_status = {
         "status": "healthy",
-        "database": "connected",  # TODO: Add actual DB health check
-        "ai_extractor": "not_configured"  # TODO: Add AI extractor health check
+        "database": "disconnected",
+        "ai_extractor": "not_configured"
     }
+
+    # Check database connectivity
+    try:
+        db.execute(text("SELECT 1"))
+        health_status["database"] = "connected"
+    except Exception as e:
+        health_status["database"] = "disconnected"
+        health_status["status"] = "unhealthy"
+
+    # Check AI extractor connectivity
+    if settings.AI_EXTRACTOR_URL:
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                response = await client.get(f"{settings.AI_EXTRACTOR_URL}/health")
+                if response.status_code == 200:
+                    health_status["ai_extractor"] = "reachable"
+                else:
+                    health_status["ai_extractor"] = "unreachable"
+                    health_status["status"] = "degraded"
+        except Exception:
+            health_status["ai_extractor"] = "unreachable"
+            health_status["status"] = "degraded"
+
+    return health_status
 
 
 @app.get("/api/health")
-async def api_health_check():
+async def api_health_check(db: Session = Depends(get_db)):
     """Health check endpoint with /api prefix for ingress compatibility"""
-    return {
-        "status": "healthy",
-        "database": "connected",
-        "ai_extractor": "not_configured"
-    }
+    return await health_check(db)
 
 
 # Import and include routers

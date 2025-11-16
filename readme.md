@@ -20,12 +20,17 @@ Public marketing website and demo for VostraInvoice - AI-powered invoice process
   - PyMuPDF for PDF→PNG conversion
   - Tested with real Swedish invoices in production
 - **Service Integration**: vostra-api ↔ ai-extractor ✅ Phase 3 complete
-- **Upload Endpoint**: POST /api/invoices/upload ✅ Fully functional
+- **Complete API Endpoints**: ✅ Phase 4 complete (tested locally)
+  - POST /api/invoices/upload - Upload & extract invoices
+  - GET /api/invoices - List with pagination & filtering
+  - GET /api/invoices/{id} - Retrieve single invoice
+  - POST /api/invoices/{id}/approve - User approval workflow
+  - GET /api/health - Enhanced connectivity checks
 - **Production Secrets**: Template-based, declarative management
 - See `cc/invoice-upload-implementation-plan.md` for roadmap
 
 ### 🚧 In Development
-- **Additional Endpoints**: GET /invoices, approve workflow (Phase 4)
+- **Production Deployment**: Deploy Phase 4 endpoints to Kubernetes (Phase 4b)
 - **Frontend Integration**: Connect React app to real API (Phase 5)
 
 ## Demo Features
@@ -50,7 +55,7 @@ Try the live demo at https://vostra.ai/vostra-invoice/
 - **CI/CD**: GitHub Actions → Auto-deploy to k8s
 
 ### Backend (Production)
-- **API Service**: FastAPI (Python 3.11) ✅ Phase 3 complete - LIVE
+- **API Service**: FastAPI (Python 3.11) ✅ Phase 4 complete - TESTED
 - **AI Extraction**: Separate FastAPI service ✅ Phase 3 complete - WORKING
   - Modular architecture (GPT-4o / GPT-5)
   - PDF→PNG conversion via PyMuPDF
@@ -58,7 +63,8 @@ Try the live demo at https://vostra.ai/vostra-invoice/
 - **Database**: PostgreSQL 15 with JSONB ✅ Deployed in Kubernetes
 - **File Storage**: RWO PersistentVolumeClaim (k3s local-path)
 - **Secrets**: Template-based declarative management with base64 encoding
-- **Next**: Additional CRUD endpoints (Phase 4)
+- **Status Flow**: uploaded → extracting → extracted → approved (or extraction_failed)
+- **Next**: Deploy Phase 4 to production, connect frontend (Phase 5)
 - **Future**: Local LLM (easy swap via modular design)
 
 ## Project Structure
@@ -168,12 +174,19 @@ Connect vostra-api to ai-extractor service.
 ```bash
 cd frontend
 npm install
+
+# Generate TypeScript types from backend OpenAPI spec (requires backend running)
+npm run generate-types
+
 npm run dev
 ```
 
 The app will be available at `http://localhost:5173/`
 
-**Note:** Local dev runs at `/` but production runs at `/vostra-invoice/`
+**Note:**
+- Local dev runs at `/` but production runs at `/vostra-invoice/`
+- Run `npm run generate-types` manually whenever backend schemas change
+- Types are generated from `http://localhost:8000/openapi.json`
 
 ### Routes
 

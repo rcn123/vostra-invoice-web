@@ -1,8 +1,32 @@
 import { Link } from 'react-router-dom';
-import { mockInvoices } from '../data/mockInvoices';
+import { useState, useEffect } from 'react';
 import DemoLayout from '../components/DemoLayout';
+import { apiClient, type Invoice } from '../services/api';
 
 export default function InvoiceListPage() {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch invoices on mount
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await apiClient.listInvoices({ limit: 50 });
+        setInvoices(response.invoices);
+        setTotal(response.total);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load invoices');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInvoices();
+  }, []);
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('sv-SE', {
       style: 'currency',
@@ -15,23 +39,25 @@ export default function InvoiceListPage() {
   };
 
   const getStatusLabel = (status: string) => {
-    const labels = {
-      draft: 'Utkast',
-      review: 'Granskas',
+    const labels: Record<string, string> = {
+      uploaded: 'Uppladdad',
+      extracting: 'Extraherar',
+      extracted: 'Extraherad',
       approved: 'Godkänd',
-      paid: 'Betald'
+      extraction_failed: 'Misslyckades'
     };
-    return labels[status as keyof typeof labels] || status;
+    return labels[status] || status;
   };
 
   const getStatusColor = (status: string) => {
-    const colors = {
-      draft: 'bg-gray-100 text-gray-700',
-      review: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-blue-100 text-blue-800',
-      paid: 'bg-green-100 text-green-800'
+    const colors: Record<string, string> = {
+      uploaded: 'bg-gray-100 text-gray-700',
+      extracting: 'bg-blue-100 text-blue-700',
+      extracted: 'bg-yellow-100 text-yellow-800',
+      approved: 'bg-green-100 text-green-800',
+      extraction_failed: 'bg-red-100 text-red-800'
     };
-    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-700';
+    return colors[status] || 'bg-gray-100 text-gray-700';
   };
 
   return (
@@ -44,7 +70,7 @@ export default function InvoiceListPage() {
               Fakturor
             </h1>
             <p className="text-gray-600">
-              {mockInvoices.length} fakturor totalt
+              {loading ? 'Laddar...' : `${total} fakturor totalt`}
             </p>
           </div>
           <Link
@@ -54,6 +80,21 @@ export default function InvoiceListPage() {
             Ladda upp faktura
           </Link>
         </div>
+
+        {/* Error State */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md">
+            <p className="font-medium">Fel vid hämtning av fakturor</p>
+            <p className="text-sm mt-1">{error}</p>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        )}
 
         {/* Invoice Table */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -82,43 +123,46 @@ export default function InvoiceListPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {mockInvoices.map((invoice) => (
-                <tr key={invoice.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {invoice.supplier.name}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {invoice.supplier.org_number}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {invoice.invoice_number}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(invoice.invoice_date)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(invoice.due_date)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
-                    {formatCurrency(invoice.total)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(invoice.status)}`}>
-                      {getStatusLabel(invoice.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link
-                      to={`/demo/invoice/${invoice.id}`}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      Visa detaljer
-                    </Link>
-                  </td>
-                </tr>
-              ))}
+              {!loading && invoices.map((invoice) => {
+                const data = invoice.raw_ai_data || {};
+                return (
+                  <tr key={invoice.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {data.supplier?.name || invoice.original_filename}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {data.supplier?.org_number || '-'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {data.invoice_number || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {data.invoice_date ? formatDate(data.invoice_date) : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {data.due_date ? formatDate(data.due_date) : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
+                      {data.total ? formatCurrency(data.total) : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(invoice.status)}`}>
+                        {getStatusLabel(invoice.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <Link
+                        to={`/demo/invoice/${invoice.id}`}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        Visa detaljer
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

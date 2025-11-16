@@ -54,7 +54,8 @@
       "Bash(docker start:*)",
       "Bash(touch:*)",
       "WebSearch",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm run generate-types:*)"
     ],
     "deny": [],
     "ask": []

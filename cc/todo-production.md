@@ -115,6 +115,7 @@
 - [ ] Load testing in staging
 - [ ] Security scanning in pipeline
 - [ ] Code coverage enforcement
+- [ ] Automate TypeScript type generation from OpenAPI (currently manual: `npm run generate-types`)
 
 ---
 

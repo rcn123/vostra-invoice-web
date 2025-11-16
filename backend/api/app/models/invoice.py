@@ -24,7 +24,7 @@ class Invoice(Base):
         default="uploaded",
         nullable=False,
         index=True
-    )  # uploaded | extracting | extracted | approved | failed
+    )  # uploaded | extracting | extracted | approved | extraction_failed
 
     # File metadata
     original_filename = Column(String(255), nullable=False)

@@ -1,10 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import DemoLayout from '../components/DemoLayout';
+import { apiClient } from '../services/api';
 
 export default function UploadPage() {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleDrag = (e: React.DragEvent) => {
@@ -34,15 +36,34 @@ export default function UploadPage() {
     }
   };
 
-  const handleFile = (file: File) => {
-    // Simulate upload and processing
-    setUploading(true);
+  const handleFile = async (file: File) => {
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Ogiltig filtyp. Endast PDF, PNG och JPG tillåts.');
+      return;
+    }
 
-    setTimeout(() => {
+    // Validate file size (10 MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError('Filen är för stor. Max storlek är 10 MB.');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError(null);
+
+      const invoice = await apiClient.uploadInvoice(file);
+
+      // Navigate to invoice detail page after successful upload
+      navigate(`/demo/invoice/${invoice.id}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Upload failed';
+      setError(errorMessage);
       setUploading(false);
-      // Navigate to invoice list after "processing"
-      navigate('/demo/invoices');
-    }, 2000);
+    }
   };
 
   return (
@@ -67,6 +88,14 @@ export default function UploadPage() {
             Dra och släpp en fil eller klicka för att välja
           </p>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md">
+            <p className="font-medium">Fel vid uppladdning</p>
+            <p className="text-sm mt-1">{error}</p>
+          </div>
+        )}
 
         {/* Upload Zone */}
         <div

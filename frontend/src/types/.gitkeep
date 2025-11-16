@@ -1,0 +1,2 @@
+# Types directory
+# Run `npm run generate-types` to generate api.ts from backend OpenAPI spec
