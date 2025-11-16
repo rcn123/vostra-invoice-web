@@ -7,7 +7,10 @@
 import type { components } from '../types/api';
 
 // Environment-based API URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// In production, use relative path (served from same domain via ingress)
+// In development, use localhost
+const API_BASE_URL = import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? '' : 'http://localhost:8000');
 
 // Type aliases from generated OpenAPI types
 export type Invoice = components['schemas']['InvoiceResponse'];
