@@ -47,8 +47,16 @@ class ApiClient {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Upload failed');
+      let errorMessage = 'Upload failed';
+      try {
+        const error = await response.json();
+        errorMessage = error.detail || errorMessage;
+      } catch {
+        // Response is not JSON (e.g., from ingress/proxy)
+        const text = await response.text();
+        errorMessage = text || `Server error (${response.status})`;
+      }
+      throw new Error(errorMessage);
     }
 
     return response.json();
@@ -64,8 +72,15 @@ class ApiClient {
       if (response.status === 404) {
         throw new Error('Invoice not found');
       }
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to fetch invoice');
+      let errorMessage = 'Failed to fetch invoice';
+      try {
+        const error = await response.json();
+        errorMessage = error.detail || errorMessage;
+      } catch {
+        const text = await response.text();
+        errorMessage = text || `Server error (${response.status})`;
+      }
+      throw new Error(errorMessage);
     }
 
     return response.json();
@@ -84,8 +99,15 @@ class ApiClient {
     const response = await fetch(url);
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to fetch invoices');
+      let errorMessage = 'Failed to fetch invoices';
+      try {
+        const error = await response.json();
+        errorMessage = error.detail || errorMessage;
+      } catch {
+        const text = await response.text();
+        errorMessage = text || `Server error (${response.status})`;
+      }
+      throw new Error(errorMessage);
     }
 
     return response.json();
@@ -104,8 +126,15 @@ class ApiClient {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to approve invoice');
+      let errorMessage = 'Failed to approve invoice';
+      try {
+        const error = await response.json();
+        errorMessage = error.detail || errorMessage;
+      } catch {
+        const text = await response.text();
+        errorMessage = text || `Server error (${response.status})`;
+      }
+      throw new Error(errorMessage);
     }
 
     return response.json();
@@ -123,8 +152,15 @@ class ApiClient {
       if (response.status === 404) {
         throw new Error('Invoice not found');
       }
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to delete invoice');
+      let errorMessage = 'Failed to delete invoice';
+      try {
+        const error = await response.json();
+        errorMessage = error.detail || errorMessage;
+      } catch {
+        const text = await response.text();
+        errorMessage = text || `Server error (${response.status})`;
+      }
+      throw new Error(errorMessage);
     }
 
     // 204 No Content - successful deletion
