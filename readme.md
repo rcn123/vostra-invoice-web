@@ -6,45 +6,60 @@ Public marketing website and demo for VostraInvoice - AI-powered invoice process
 
 ## Current Status
 
-### ✅ Live & Working
-- **Frontend Demo**: Full invoice management UI with mock data
-- **TypeScript**: Complete conversion from JavaScript
-- **XAI Features**: Explainable AI with confidence scores and explanations
-- **Deployment**: Auto-deploy via GitHub Actions to Kubernetes
-- **SSL/HTTPS**: Let's Encrypt with auto-renewal
+### ✅ Complete End-to-End System - LIVE IN PRODUCTION
 
-### ✅ Backend Operational in Production
-- **API Service**: FastAPI with PostgreSQL ✅ Live at https://vostra.ai/api
-- **AI Extraction**: OpenAI GPT-4o Vision with PDF support ✅ Working
-  - Modular extractors for easy model swapping
-  - PyMuPDF for PDF→PNG conversion
-  - Tested with real Swedish invoices in production
-- **Service Integration**: vostra-api ↔ ai-extractor ✅ Phase 3 complete
-- **Complete API Endpoints**: ✅ Phase 4 complete (tested locally)
-  - POST /api/invoices/upload - Upload & extract invoices
-  - GET /api/invoices - List with pagination & filtering
+**Full Invoice Processing Workflow**: Upload → AI Extract → Review → Approve ✅
+
+- **Frontend Application**: React + TypeScript, fully connected to backend API
+  - Real-time invoice upload with client-side validation
+  - Live invoice list with pagination and filtering
+  - Invoice detail view with approval workflow
+  - Modern UX: Toast notifications, graceful error handling
+  - Type-safe API client with OpenAPI-generated types
+  - Live at: https://vostra.ai/vostra-invoice/
+
+- **Backend API**: FastAPI + PostgreSQL ✅ Live at https://vostra.ai/api
+  - POST /api/invoices/upload - Upload & AI extract invoices
+  - GET /api/invoices - List with pagination & status filtering
   - GET /api/invoices/{id} - Retrieve single invoice
   - POST /api/invoices/{id}/approve - User approval workflow
-  - GET /api/health - Enhanced connectivity checks
-- **Production Secrets**: Template-based, declarative management
-- See `cc/invoice-upload-implementation-plan.md` for roadmap
+  - DELETE /api/invoices/{id} - Dev cleanup (marked unsafe for prod)
+  - GET /api/health - DB + AI connectivity checks
 
-### 🚧 In Development
-- **Production Deployment**: Deploy Phase 4 endpoints to Kubernetes (Phase 4b)
-- **Frontend Integration**: Connect React app to real API (Phase 5)
+- **AI Extraction**: OpenAI GPT-4o Vision ✅ Working in production
+  - Modular architecture for easy model swapping
+  - PyMuPDF for PDF→PNG conversion
+  - Tested with real Swedish invoices
 
-## Demo Features
+- **Infrastructure**: Kubernetes (k3s) + Traefik + Let's Encrypt SSL ✅ Auto-deploy
 
-Try the live demo at https://vostra.ai/vostra-invoice/
+### 🚧 Next Phase
+- **Phase 6**: Production hardening (monitoring, rate limiting, security)
 
-- **Invoice List**: Browse invoices with status, supplier, and amounts
-- **Invoice Detail**: View full invoice with line items
-- **AI Suggestions**: Multiple account coding options with confidence scores
-- **XAI (Explainable AI)**:
+## Features
+
+Try the live system at https://vostra.ai/vostra-invoice/
+
+### Real Invoice Processing
+- **Upload Invoices**: Drag-and-drop PDF, PNG, or JPG files (max 10 MB)
+- **AI Extraction**: Automatic data extraction using GPT-4o Vision
+  - Supplier information (name, org number, contact)
+  - Invoice details (number, dates, amounts, VAT)
+  - Line items with descriptions and amounts
+- **Review & Approve**: View extracted data, make corrections, approve
+- **Status Tracking**: uploaded → extracting → extracted → approved → extraction_failed
+
+### User Experience
+- **Modern UI**: Toast notifications, loading states, error handling
+- **Type Safety**: TypeScript throughout with OpenAPI-generated types
+- **Swedish Localization**: All text in Swedish for municipal users
+- **Responsive Design**: Works on desktop and mobile
+
+### For Future Enhancement
+- **XAI (Explainable AI)** UI components ready:
   - Visual confidence bars (green/yellow/gray)
   - Clickable explanations showing matched words, history, and reasoning
   - Dynamic updates when changing account selections
-- **Swedish Localization**: All text in Swedish for municipal users
 
 ## Tech Stack
 
@@ -55,28 +70,31 @@ Try the live demo at https://vostra.ai/vostra-invoice/
 - **CI/CD**: GitHub Actions → Auto-deploy to k8s
 
 ### Backend (Production)
-- **API Service**: FastAPI (Python 3.11) ✅ Phase 4 complete - TESTED
-- **AI Extraction**: Separate FastAPI service ✅ Phase 3 complete - WORKING
+- **API Service**: FastAPI (Python 3.11) ✅ DEPLOYED & OPERATIONAL
+- **AI Extraction**: Separate FastAPI service ✅ DEPLOYED & WORKING
   - Modular architecture (GPT-4o / GPT-5)
   - PDF→PNG conversion via PyMuPDF
   - Comprehensive Swedish extraction prompt
-- **Database**: PostgreSQL 15 with JSONB ✅ Deployed in Kubernetes
+- **Database**: PostgreSQL 15 with JSONB ✅ Running in Kubernetes
 - **File Storage**: RWO PersistentVolumeClaim (k3s local-path)
-- **Secrets**: Template-based declarative management with base64 encoding
+- **Secrets**: GitHub Secrets with alphanumeric passwords (no special chars)
 - **Status Flow**: uploaded → extracting → extracted → approved (or extraction_failed)
-- **Next**: Deploy Phase 4 to production, connect frontend (Phase 5)
+- **Complete Integration**: Frontend ↔ API ↔ AI ↔ Database ✅ Phase 5 complete
 - **Future**: Local LLM (easy swap via modular design)
 
 ## Project Structure
 
 ```
 vostra-invoice-web/
-├── frontend/                      # React + TypeScript application ✅ LIVE
+├── frontend/                      # React + TypeScript application ✅ LIVE & CONNECTED
 │   ├── src/
-│   │   ├── components/           # Reusable components (AccountDropdown, DemoLayout)
-│   │   ├── pages/                # Invoice pages (List, Detail, Upload)
-│   │   ├── data/                 # Mock invoice data (mockInvoices.ts)
+│   │   ├── services/             # API client (type-safe, OpenAPI-generated)
+│   │   ├── types/                # TypeScript types (auto-generated from backend)
+│   │   ├── components/           # Toast, ErrorBoundary, AccountDropdown, DemoLayout
+│   │   ├── pages/                # InvoiceListPage, InvoiceDetailPage, UploadPage
+│   │   ├── data/                 # Mock data (deprecated, kept for reference)
 │   │   └── App.tsx               # Main app with routing
+│   ├── package.json              # Includes "generate-types" script
 │   ├── vite.config.js            # Vite config (base: '/vostra-invoice/')
 │   ├── tsconfig.json             # TypeScript configuration
 │   └── Dockerfile                # Multi-stage Docker build
@@ -475,29 +493,46 @@ Ensure these are set (one-time setup):
 
 ## Backend Implementation
 
-### Progress
+### Implementation Progress
 
-- ✅ **Phase 1 (vostra-api)**: Database, models, file storage
-- ✅ **Phase 2 (vostra-ai-extractor)**: OpenAI Vision (GPT-4o/GPT-5) + PDF support
-- 🚧 **Phase 3 (Integration)**: Connect services - NEXT
-- 📋 **Phase 4-6**: Additional endpoints, frontend, deployment
+- ✅ **Phase 1**: Backend API foundation (database, models, file storage)
+- ✅ **Phase 2**: AI extraction service (GPT-4o/GPT-5 + PDF support)
+- ✅ **Phase 3**: Service integration (API ↔ AI extractor)
+- ✅ **Phase 4**: Additional API endpoints (list, detail, approve, health)
+- ✅ **Phase 5**: Frontend integration & UX (connected to real API)
+- 🚧 **Phase 6**: Production hardening (monitoring, security, optimization)
 
-See **`cc/invoice-upload-implementation-plan.md`** for complete roadmap.
+See **`cc/invoice-upload-implementation-plan.md`** and **`CLAUDE.md`** for details.
 
-### Architecture
+### Production Architecture
 
 ```
-React Frontend
+User Browser (https://vostra.ai/vostra-invoice/)
+    ↓ HTTPS (Let's Encrypt SSL)
+Traefik Ingress (Kubernetes)
     ↓
-vostra-api (FastAPI) ✅
-    ├── PostgreSQL (invoices, raw_ai_data, user_validated_data) ✅
-    ├── File Storage ✅
-    └── → vostra-ai-extractor (FastAPI) ✅
-              └── OpenAI GPT-5 Vision API ✅
-                  (later: local LLM)
+React Frontend (TypeScript) ✅ DEPLOYED
+    ├── Type-safe API client (OpenAPI-generated types)
+    ├── Toast notifications & ErrorBoundary
+    └── Upload, List, Detail, Approve pages
+        ↓ /api/* (relative path routing)
+vostra-api (FastAPI) ✅ DEPLOYED
+    ├── PostgreSQL 15 (invoices, raw_ai_data, user_validated_data) ✅
+    ├── File Storage (PersistentVolume) ✅
+    ├── POST /upload, GET /list, GET /detail, POST /approve ✅
+    └── → vostra-ai-extractor (FastAPI) ✅ DEPLOYED
+              ├── GPT-4o Vision API (OpenAI) ✅
+              ├── PDF→PNG conversion (PyMuPDF) ✅
+              └── Swedish invoice extraction ✅
+
+Kubernetes (k3s on Hetzner)
+├── Pods: postgres, vostra-api, vostra-ai-extractor, vostra-invoice (all Running)
+├── Services: ClusterIP for internal routing
+├── Ingress: Path-based routing with SSL
+└── PersistentVolumes: Invoice file storage
 ```
 
-**Status Flow**: `uploaded → extracting → extracted → approved → failed`
+**Status Flow**: `uploaded → extracting → extracted → approved` (or `extraction_failed`)
 
 ## Session Continuity
 
