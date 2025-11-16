@@ -1,6 +1,6 @@
 # Claude Code Session Guide
 
-**Last Updated:** 2025-11-16 (Phase 5 Complete - Frontend Connected to Real API)
+**Last Updated:** 2025-11-16 (Phase 5 Complete & Deployed - Full End-to-End Working in Production)
 **Project:** VostraInvoice - AI-powered invoice processing for Swedish municipalities
 
 ---
@@ -96,9 +96,11 @@
    - **Status flow**: `uploaded → extracting → extracted → approved` (or `extraction_failed`)
    - **Tested**: All endpoints working locally with docker-compose ✅
 
-7. **Phase 5: Frontend Integration & UX Improvements** ✅ **TESTED & WORKING**
+7. **Phase 5: Frontend Integration & UX Improvements** ✅ **DEPLOYED & WORKING IN PRODUCTION**
    - **OpenAPI Type Generation**: `npm run generate-types` from backend spec
    - **Type-Safe API Client**: `frontend/src/services/api.ts` using generated types
+   - **Graceful Error Handling**: Non-JSON responses (from ingress/proxy) handled properly
+   - **Production API URL**: Uses relative paths in production, localhost in dev
    - **InvoiceListPage**: Real data from GET /api/invoices with loading/error states
    - **InvoiceDetailPage**: Real data, approve workflow, delete button (dev only)
    - **UploadPage**: Real file upload with client-side validation (type, size)
@@ -107,55 +109,73 @@
    - **DELETE /api/invoices/{id}** (DEV ONLY): Cleanup test data, deletes file + DB record
    - **Status display**: Shows uploaded/extracting/extracted/approved/extraction_failed
    - **Per-line account coding**: Swedish municipal standard preserved
+   - **Production Fixes Applied**:
+     - Database password changed to alphanumeric (no special chars requiring URL encoding)
+     - API error responses gracefully handle non-JSON (ingress errors)
+     - Frontend uses relative API paths in production
    - **Complete flow tested**: Upload → Extract → View → Approve → Delete ✅
+   - **Live in production**: https://vostra.ai/vostra-invoice/ ✅
 
 ### 🚧 Next Phase
 
-**Phase 6: Local Testing & Production Deployment**
+**Phase 6: Production Hardening & Optimization**
 
-Testing and deployment tasks:
-1. Test complete upload → extraction → approval flow locally
-2. Verify all API endpoints work correctly with frontend
-3. Test error handling (extraction_failed, network errors)
-4. Deploy Phase 4 backend to Kubernetes production
-5. Deploy Phase 5 frontend to production
-6. End-to-end testing in production environment
+Now that the complete system is working end-to-end in production, focus on:
+1. **Security**: Restrict DELETE endpoint (currently dev-only but not enforced)
+2. **Monitoring**: Add logging, metrics, alerting for production health
+3. **Performance**: Optimize AI extraction times, add caching where appropriate
+4. **Rate Limiting**: Protect API endpoints from abuse
+5. **Error Tracking**: Centralized error logging (Sentry or similar)
+6. **Testing**: Automated integration tests for critical workflows
+7. **Documentation**: API documentation for external consumers
 
 ---
 
 ## Architecture Overview
 
-### Current (Frontend Connected to Backend)
+### Current (Full End-to-End Production System)
 ```
-React Frontend (TypeScript) ✅ CONNECTED
-├── OpenAPI-generated types
-├── Type-safe API client
-├── InvoiceListPage → GET /api/invoices
-├── InvoiceDetailPage → GET /api/invoices/{id}, POST approve
-├── UploadPage → POST /api/invoices/upload
-└── XAI Features (Explainability)
+Production: https://vostra.ai/vostra-invoice/ ✅ LIVE
 
-Backend API (Local: http://localhost:8000) ✅
+React Frontend (TypeScript) ✅ DEPLOYED & CONNECTED
+├── OpenAPI-generated types from backend
+├── Type-safe API client with graceful error handling
+├── InvoiceListPage → GET /api/invoices (pagination + filtering)
+├── InvoiceDetailPage → GET /api/invoices/{id}, POST approve, DELETE
+├── UploadPage → POST /api/invoices/upload (real file upload)
+├── Toast notifications (modern UX, no alert boxes)
+├── ErrorBoundary (graceful React error handling)
+└── XAI Features (Explainability UI ready for future enhancements)
+    ↓ (HTTPS via Traefik Ingress)
+
+Backend API: https://vostra.ai/api ✅ DEPLOYED & OPERATIONAL
 │
-vostra-api (FastAPI) - Deployed ✅
+vostra-api (FastAPI) ✅
     ├── PostgreSQL Database (vostra-invoice-web) ✅
     ├── File Storage (/storage/vostra-invoice-web/uploads) ✅
-    ├── POST /api/invoices/upload ✅ WORKING
-    ├── GET /api/invoices ✅ WORKING (pagination + filtering)
-    ├── GET /api/invoices/{id} ✅ WORKING
-    ├── POST /api/invoices/{id}/approve ✅ WORKING
-    ├── GET /api/health ✅ WORKING (enhanced with DB + AI checks)
-    └── → vostra-ai-extractor (FastAPI) ✅ WORKING
-              ├── GPT-4o Vision (production) ✅
-              ├── PDF→PNG conversion ✅
+    ├── POST /api/invoices/upload ✅ (validates, stores, extracts)
+    ├── GET /api/invoices ✅ (pagination, status filtering)
+    ├── GET /api/invoices/{id} ✅ (single invoice retrieval)
+    ├── POST /api/invoices/{id}/approve ✅ (user validation workflow)
+    ├── DELETE /api/invoices/{id} ✅ (dev cleanup, marked unsafe)
+    ├── GET /api/health ✅ (DB + AI connectivity checks)
+    └── → vostra-ai-extractor (FastAPI) ✅ DEPLOYED
+              ├── GPT-4o Vision API (OpenAI) ✅
+              ├── PDF→PNG conversion (PyMuPDF) ✅
               └── Swedish invoice extraction ✅
 
-Kubernetes (k3s on Hetzner) ✅
+Kubernetes (k3s on Hetzner Cloud) ✅
 ├── Namespace: vostra-invoice-web
-├── Pods: postgres, vostra-api, vostra-ai-extractor (all Running)
-├── Secrets: Template-based management with base64 encoding
-├── Storage: RWO PersistentVolumeClaims
-└── Ingress: Traefik with Let's Encrypt SSL
+├── Pods: postgres, vostra-api, vostra-ai-extractor, vostra-invoice (all Running)
+├── Secrets: DB_PASSWORD, OPENAI_API_KEY (alphanumeric for safety)
+├── Storage: RWO PersistentVolumeClaims (local-path provisioner)
+├── Ingress: Traefik with Let's Encrypt SSL (auto-renewal)
+└── Services: ClusterIP for internal communication
+
+Complete Workflow (End-to-End):
+User uploads PDF → Frontend validates → API stores file → DB creates record →
+AI extractor processes → Updates DB with extracted data → User reviews →
+User approves with corrections → Final data saved → Ready for export
 ```
 
 ---
@@ -174,12 +194,16 @@ Kubernetes (k3s on Hetzner) ✅
 - `README.md` - User-facing documentation
 
 ### Frontend (React + TypeScript)
-- `frontend/src/pages/InvoiceDetailPage.tsx` - Detail view with XAI features
-- `frontend/src/pages/InvoiceListPage.tsx` - Grid view of invoices
-- `frontend/src/pages/UploadPage.tsx` - File upload (currently mock)
+- `frontend/src/services/api.ts` - Type-safe API client (uses generated types)
+- `frontend/src/types/api.ts` - Auto-generated OpenAPI types (run `npm run generate-types`)
+- `frontend/src/pages/InvoiceDetailPage.tsx` - Detail view with approval & XAI features
+- `frontend/src/pages/InvoiceListPage.tsx` - Invoice list (real data from API)
+- `frontend/src/pages/UploadPage.tsx` - Real file upload with validation
+- `frontend/src/components/Toast.tsx` - Modern toast notifications
+- `frontend/src/components/ErrorBoundary.tsx` - Graceful error handling
 - `frontend/src/components/AccountDropdown.tsx` - Account selection dropdown
 - `frontend/src/components/DemoLayout.tsx` - Application layout
-- `frontend/src/data/mockInvoices.ts` - Mock invoice data
+- `frontend/src/data/mockInvoices.ts` - Mock data (deprecated, kept for reference)
 
 ### Backend (Phases 1 & 2 Complete)
 
@@ -342,10 +366,13 @@ See **`cc/invoice-upload-implementation-plan.md`** for complete roadmap.
 ✅ **Enhanced health checks** (DB + AI connectivity)
 ✅ **Status flow validation** (extraction_failed handling)
 
-### What Still Needs Implementation
-❌ End-to-end testing of complete flow
-❌ Production deployment of Phase 4 backend
-❌ Production deployment of Phase 5 frontend
+### What Still Needs Implementation (Phase 6 - Production Hardening)
+❌ DELETE endpoint access control (currently dev-only in comments, not enforced)
+❌ Rate limiting and API abuse protection
+❌ Centralized error logging and monitoring (Sentry, CloudWatch, etc.)
+❌ Performance optimization (caching strategies, query optimization)
+❌ Automated integration tests for critical workflows
+❌ API documentation for external consumers (Swagger UI enhancement)
 
 ### Database Status Flow (Implemented)
 `uploaded → extracting → extracted → approved` (or `extraction_failed`)
