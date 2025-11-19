@@ -1,6 +1,6 @@
 # Claude Code Session Guide
 
-**Last Updated:** 2025-11-16 (Phase 5 Complete & Deployed - Full End-to-End Working in Production)
+**Last Updated:** 2025-11-19 (Domain Migration to vostrainvoice.se)
 **Project:** VostraInvoice - AI-powered invoice processing for Swedish municipalities
 
 ---
@@ -34,7 +34,9 @@
    - SSL with Let's Encrypt (auto-renewal)
    - Multi-service deployment (landing + invoice app)
    - **Secrets Management**: GitHub Secrets (DB_PASSWORD, OPENAI_API_KEY)
-   - Live at: https://vostra.ai/vostra-invoice/
+   - **Primary domain**: https://vostrainvoice.se/ (Swedish .se domain)
+   - **Secondary domain**: https://vostrainvoice.com/ (for future global expansion)
+   - **Legacy domain**: https://vostra.ai/vostra-invoice/ (kept for transition period)
 
 3. **Mock Data System**
    - 3 realistic Swedish invoices in `frontend/src/data/mockInvoices.ts`
@@ -135,7 +137,9 @@ Now that the complete system is working end-to-end in production, focus on:
 
 ### Current (Full End-to-End Production System)
 ```
-Production: https://vostra.ai/vostra-invoice/ ✅ LIVE
+Production: https://vostrainvoice.se/ ✅ LIVE (Primary)
+           https://vostrainvoice.com/ ✅ LIVE (Secondary)
+           https://vostra.ai/vostra-invoice/ ✅ LIVE (Legacy)
 
 React Frontend (TypeScript) ✅ DEPLOYED & CONNECTED
 ├── OpenAPI-generated types from backend
@@ -388,8 +392,10 @@ See **`cc/invoice-upload-implementation-plan.md`** for complete roadmap.
 ## Deployment
 
 ### Live URLs
-- **Landing**: https://vostra.ai/
-- **Invoice App**: https://vostra.ai/vostra-invoice/
+- **Invoice App (Primary)**: https://vostrainvoice.se/
+- **Invoice App (Secondary)**: https://vostrainvoice.com/
+- **Invoice App (Legacy)**: https://vostra.ai/vostra-invoice/
+- **Landing Page (Legacy)**: https://vostra.ai/
 
 ### Deploy Process
 1. Push to GitHub: `git push origin main`
@@ -511,7 +517,7 @@ git push origin main
 - **Ground Truth Schema**: `cc/ground-truth-schema.json`
 - **Implementation Plan**: `cc/invoice-upload-implementation-plan.md`
 - **Core Rules**: `cc/core-rules.md`
-- **Live Demo**: https://vostra.ai/vostra-invoice/
+- **Live Demo**: https://vostrainvoice.se/
 - **GitHub Repo**: https://github.com/rcn123/vostra-invoice-web
 
 ---

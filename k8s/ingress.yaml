@@ -10,10 +10,87 @@ spec:
   ingressClassName: traefik
   tls:
   - hosts:
+    - vostrainvoice.se
+    - www.vostrainvoice.se
+    - vostrainvoice.com
+    - www.vostrainvoice.com
+    secretName: vostrainvoice-tls
+  - hosts:
     - vostra.ai
     - www.vostra.ai
     secretName: vostra-tls
   rules:
+  # New primary domain: vostrainvoice.se (root path)
+  - host: vostrainvoice.se
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-api
+            port:
+              number: 8000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-invoice
+            port:
+              number: 80
+  - host: www.vostrainvoice.se
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-api
+            port:
+              number: 8000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-invoice
+            port:
+              number: 80
+  # Secondary domain: vostrainvoice.com (root path)
+  - host: vostrainvoice.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-api
+            port:
+              number: 8000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-invoice
+            port:
+              number: 80
+  - host: www.vostrainvoice.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-api
+            port:
+              number: 8000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vostra-invoice
+            port:
+              number: 80
+  # Legacy domain: vostra.ai (keep working with old paths)
   - host: vostra.ai
     http:
       paths:

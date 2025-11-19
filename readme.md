@@ -2,7 +2,7 @@
 
 Public marketing website and demo for VostraInvoice - AI-powered invoice processing for Swedish municipalities and organizations.
 
-**Live at:** https://vostra.ai/vostra-invoice/
+**Live at:** https://vostrainvoice.se/ (primary), https://vostrainvoice.com/ (secondary)
 
 ## Current Status
 
@@ -16,7 +16,9 @@ Public marketing website and demo for VostraInvoice - AI-powered invoice process
   - Invoice detail view with approval workflow
   - Modern UX: Toast notifications, graceful error handling
   - Type-safe API client with OpenAPI-generated types
-  - Live at: https://vostra.ai/vostra-invoice/
+  - **Primary**: https://vostrainvoice.se/
+  - **Secondary**: https://vostrainvoice.com/
+  - **Legacy**: https://vostra.ai/vostra-invoice/ (transition period)
 
 - **Backend API**: FastAPI + PostgreSQL ✅ Live at https://vostra.ai/api
   - POST /api/invoices/upload - Upload & AI extract invoices
@@ -38,7 +40,7 @@ Public marketing website and demo for VostraInvoice - AI-powered invoice process
 
 ## Features
 
-Try the live system at https://vostra.ai/vostra-invoice/
+Try the live system at https://vostrainvoice.se/
 
 ### Real Invoice Processing
 - **Upload Invoices**: Drag-and-drop PDF, PNG, or JPG files (max 10 MB)
@@ -143,9 +145,11 @@ vostra-invoice-web/
 ## Live Deployment
 
 ### Production URLs
-- **Landing Page**: https://vostra.ai/
-- **Invoice App**: https://vostra.ai/vostra-invoice/
-- **SSL**: Valid Let's Encrypt certificate (auto-renews)
+- **Invoice App (Primary)**: https://vostrainvoice.se/
+- **Invoice App (Secondary)**: https://vostrainvoice.com/
+- **Invoice App (Legacy)**: https://vostra.ai/vostra-invoice/
+- **Landing Page (Legacy)**: https://vostra.ai/
+- **SSL**: Valid Let's Encrypt certificates (auto-renew)
 
 ### Infrastructure
 - **Server**: Hetzner dedicated (65.21.145.222)
@@ -202,7 +206,7 @@ npm run dev
 The app will be available at `http://localhost:5173/`
 
 **Note:**
-- Local dev runs at `/` but production runs at `/vostra-invoice/`
+- Both local dev and production now run at root path `/`
 - Run `npm run generate-types` manually whenever backend schemas change
 - Types are generated from `http://localhost:8000/openapi.json`
 
@@ -401,11 +405,13 @@ kubectl rollout restart deployment/vostra-invoice -n vostra
 
 ```bash
 # Check DNS propagation
-nslookup vostra.ai 8.8.8.8
-nslookup www.vostra.ai 8.8.8.8
+nslookup vostrainvoice.se 8.8.8.8
+nslookup www.vostrainvoice.se 8.8.8.8
+nslookup vostrainvoice.com 8.8.8.8
 
 # Test from server
-curl -I https://vostra.ai/
+curl -I https://vostrainvoice.se/
+curl -I https://vostrainvoice.com/
 ```
 
 ## Architecture
@@ -413,25 +419,37 @@ curl -I https://vostra.ai/
 ### Path-Based Routing
 
 ```
-https://vostra.ai/
+Primary domains (vostrainvoice.se, vostrainvoice.com):
+├── /                    → vostra-invoice (React app at root)
+└── /api/                → vostra-api (backend API)
+
+Legacy domain (vostra.ai):
 ├── /                    → vostra-landing (root landing page)
-└── /vostra-invoice/     → vostra-invoice (React app)
+├── /vostra-invoice/     → vostra-invoice (React app at subpath)
+└── /api/                → vostra-api (backend API)
 ```
 
 ### Request Flow
 
 ```
-User Request
+User Request (vostrainvoice.se or vostrainvoice.com)
     ↓
-DNS (vostra.ai → 65.21.145.222)
+DNS → 65.21.145.222
     ↓
 Traefik Ingress (port 443)
     ↓
-SSL Termination (Let's Encrypt cert)
+SSL Termination (Let's Encrypt certs)
+    ↓
+Path-Based Routing
+    ├── / → vostra-invoice service → invoice pods (root path)
+    └── /api/ → vostra-api service → api pods
+
+User Request (vostra.ai - legacy)
     ↓
 Path-Based Routing
     ├── / → vostra-landing service → landing pods
-    └── /vostra-invoice/ → vostra-invoice service → invoice pods
+    ├── /vostra-invoice/ → vostra-invoice service → invoice pods
+    └── /api/ → vostra-api service → api pods
 ```
 
 ### Port Configuration
@@ -448,9 +466,10 @@ Path-Based Routing
 
 1. **Push to deploy**: Just `git push origin main` and GitHub Actions handles everything
 2. **No server access needed**: GitHub Actions SSHs to server for you
-3. **Path differences**:
+3. **Path structure**:
    - Local dev: `http://localhost:5173/` (root path)
-   - Production: `https://vostra.ai/vostra-invoice/` (subpath)
+   - Production: `https://vostrainvoice.se/` (root path)
+   - Legacy: `https://vostra.ai/vostra-invoice/` (subpath, transition only)
 4. **Test builds locally**:
    ```bash
    cd frontend
@@ -507,11 +526,11 @@ See **`cc/invoice-upload-implementation-plan.md`** and **`CLAUDE.md`** for detai
 ### Production Architecture
 
 ```
-User Browser (https://vostra.ai/vostra-invoice/)
+User Browser (https://vostrainvoice.se/)
     ↓ HTTPS (Let's Encrypt SSL)
 Traefik Ingress (Kubernetes)
     ↓
-React Frontend (TypeScript) ✅ DEPLOYED
+React Frontend (TypeScript) ✅ DEPLOYED (Root Path)
     ├── Type-safe API client (OpenAPI-generated types)
     ├── Toast notifications & ErrorBoundary
     └── Upload, List, Detail, Approve pages
@@ -528,7 +547,7 @@ vostra-api (FastAPI) ✅ DEPLOYED
 Kubernetes (k3s on Hetzner)
 ├── Pods: postgres, vostra-api, vostra-ai-extractor, vostra-invoice (all Running)
 ├── Services: ClusterIP for internal routing
-├── Ingress: Path-based routing with SSL
+├── Ingress: Multi-domain routing with SSL (vostrainvoice.se, .com, vostra.ai)
 └── PersistentVolumes: Invoice file storage
 ```
 
