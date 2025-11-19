@@ -89,6 +89,17 @@ export default function UploadPage() {
           </p>
         </div>
 
+        {/* Privacy Warning */}
+        <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-sm text-yellow-900 leading-relaxed">
+            <strong>Ladda inte upp dokument som innehåller sekretessbelagda uppgifter.</strong>
+            <br />
+            Demo-miljön är avsedd för test med öppna och offentliga dokument.
+            <br />
+            Filer du laddar upp används endast för visning i denna session/inloggning och sparas inte permanent.
+          </p>
+        </div>
+
         {/* Error Display */}
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md">

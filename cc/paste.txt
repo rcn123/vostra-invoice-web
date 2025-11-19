@@ -1,60 +1,17 @@
-root@vostra-server:~#   kubectl get certificate -n vostra-invoice-web
-  kubectl describe certificate vostrainvoice-tls -n vostra-invoice-web
-  kubectl get challenges -n vostra-invoice-web
-NAME                READY   SECRET              AGE
-vostra-tls          True    vostra-tls          3d17h
-vostrainvoice-tls   False   vostrainvoice-tls   86m
-Name:         vostrainvoice-tls
-Namespace:    vostra-invoice-web
-Labels:       <none>
-Annotations:  <none>
-API Version:  cert-manager.io/v1
-Kind:         Certificate
-Metadata:
-  Creation Timestamp:  2025-11-19T11:37:06Z
-  Generation:          1
-  Owner References:
-    API Version:           networking.k8s.io/v1
-    Block Owner Deletion:  true
-    Controller:            true
-    Kind:                  Ingress
-    Name:                  vostra-ingress
-    UID:                   f7de8752-44b0-4bd5-a9fe-65899fb43308
-  Resource Version:        451376
-  UID:                     3f582817-f052-4ea6-a14a-b30686d4e505
-Spec:
-  Dns Names:
-    vostrainvoice.se
-    www.vostrainvoice.se
-    vostrainvoice.com
-    www.vostrainvoice.com
-  Issuer Ref:
-    Group:      cert-manager.io
-    Kind:       ClusterIssuer
-    Name:       letsencrypt-prod
-  Secret Name:  vostrainvoice-tls
-  Usages:
-    digital signature
-    key encipherment
-Status:
-  Conditions:
-    Last Transition Time:        2025-11-19T11:37:07Z
-    Message:                     Issuing certificate as Secret does not exist
-    Observed Generation:         1
-    Reason:                      DoesNotExist
-    Status:                      True
-    Type:                        Issuing
-    Last Transition Time:        2025-11-19T11:37:07Z
-    Message:                     Issuing certificate as Secret does not exist
-    Observed Generation:         1
-    Reason:                      DoesNotExist
-    Status:                      False
-    Type:                        Ready
-  Next Private Key Secret Name:  vostrainvoice-tls-g7d9m
-Events:                          <none>
-NAME                                       STATE     DOMAIN                  AGE
-vostrainvoice-tls-1-562842374-1670352422   pending   vostrainvoice.com       86m
-vostrainvoice-tls-1-562842374-2711227199   valid     vostrainvoice.se        86m
-vostrainvoice-tls-1-562842374-3016172507   valid     www.vostrainvoice.se    86m
-vostrainvoice-tls-1-562842374-4257089306   pending   www.vostrainvoice.com   86m
-root@vostra-server:~# 
+VostraInvoice
+AI-kontering med människa i loopen
+
+Smidig fakturahantering för kommuner och små organisationer
+
+Testa Demo
+Transparens som standard
+Komplett spårbarhet från mottagning till godkännande. Varje steg loggas automatiskt för intern kontroll och revision.
+
+Förklarande AI
+Varje konteringsförslag visas med förklaring och alternativa val. Besluten blir begripliga och granskningsbara.
+
+Människa i loopen
+Användaren har alltid sista ordet. Alla justeringar registreras och förbättrar systemet över tid.
+
+Hybrid intelligens
+Kombinerar maskininlärning med redovisnings- och avtalsregler för tillförlitliga resultat.
