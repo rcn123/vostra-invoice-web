@@ -89,7 +89,7 @@ class ErrorBoundary extends Component<Props, State> {
                     Ladda om sidan
                   </button>
                   <button
-                    onClick={() => window.location.href = '/vostra-invoice/demo/invoices'}
+                    onClick={() => window.location.href = '/demo/invoices'}
                     className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-medium transition-colors"
                   >
                     Tillbaka till fakturor

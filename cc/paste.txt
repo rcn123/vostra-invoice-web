@@ -1,51 +1,60 @@
-robju@PARKER:/mnt/c/Users/Robert/source/repos/vostra-invoice-web/frontend$  curl -i https://vostra.ai/api/health
-FROM CLIENT (MY LOCAL MACHINE)
-
-
-HTTP/2 200 
-content-type: application/json
-date: Sun, 16 Nov 2025 22:26:07 GMT
-server: uvicorn
-content-length: 70
-
-{"status":"healthy","database":"connected","ai_extractor":"reachable"}robju@PARKER:/mnt/c/Users/Robert/source/repos/vostra-invoice-web/frontend$ curl -i https://vostra.ai/api/invoices/upload
-HTTP/2 422 
-content-type: application/json
-date: Sun, 16 Nov 2025 22:26:20 GMT
-server: uvicorn
-content-length: 212
-
-{"detail":[{"type":"int_parsing","loc":["path","invoice_id"],"msg":"Input should be a valid integer, unable to parse string as an integer","input":"upload","url":"https://errors.pydantic.dev/2.5/v/int_parsing"}]}robju@PARKER:/mnt/c/Users/Robert/source/repos/vostra-invoice-web/frontend$ 
-
-
-----------------
-ON SERVER
-
-----------------
-root@vostra-server:~# kubectl get ingress -n vostra-invoice-web
-NAME             CLASS     HOSTS                     ADDRESS         PORTS     AGE
-vostra-ingress   traefik   vostra.ai,www.vostra.ai   65.21.145.222   80, 443   27h
-root@vostra-server:~# kubectl describe ingress vostra-ingress -n vostra-invoice-web
-Name:             vostra-ingress
-Labels:           <none>
-Namespace:        vostra-invoice-web
-Address:          65.21.145.222
-Ingress Class:    traefik
-Default backend:  <default>
-TLS:
-  vostra-tls terminates vostra.ai,www.vostra.ai
-Rules:
-  Host           Path  Backends
-  ----           ----  --------
-  vostra.ai      
-                 /api              vostra-api:8000 (10.42.0.232:8000)
-                 /vostra-invoice   vostra-invoice:80 (10.42.0.234:80,10.42.0.236:80)
-                 /                 vostra-landing:80 (10.42.0.233:80,10.42.0.235:80)
-  www.vostra.ai  
-                 /api              vostra-api:8000 (10.42.0.232:8000)
-                 /vostra-invoice   vostra-invoice:80 (10.42.0.234:80,10.42.0.236:80)
-                 /                 vostra-landing:80 (10.42.0.233:80,10.42.0.235:80)
-Annotations:     cert-manager.io/cluster-issuer: letsencrypt-prod
-                 traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-Events:          <none>
+root@vostra-server:~#   kubectl get certificate -n vostra-invoice-web
+  kubectl describe certificate vostrainvoice-tls -n vostra-invoice-web
+  kubectl get challenges -n vostra-invoice-web
+NAME                READY   SECRET              AGE
+vostra-tls          True    vostra-tls          3d17h
+vostrainvoice-tls   False   vostrainvoice-tls   86m
+Name:         vostrainvoice-tls
+Namespace:    vostra-invoice-web
+Labels:       <none>
+Annotations:  <none>
+API Version:  cert-manager.io/v1
+Kind:         Certificate
+Metadata:
+  Creation Timestamp:  2025-11-19T11:37:06Z
+  Generation:          1
+  Owner References:
+    API Version:           networking.k8s.io/v1
+    Block Owner Deletion:  true
+    Controller:            true
+    Kind:                  Ingress
+    Name:                  vostra-ingress
+    UID:                   f7de8752-44b0-4bd5-a9fe-65899fb43308
+  Resource Version:        451376
+  UID:                     3f582817-f052-4ea6-a14a-b30686d4e505
+Spec:
+  Dns Names:
+    vostrainvoice.se
+    www.vostrainvoice.se
+    vostrainvoice.com
+    www.vostrainvoice.com
+  Issuer Ref:
+    Group:      cert-manager.io
+    Kind:       ClusterIssuer
+    Name:       letsencrypt-prod
+  Secret Name:  vostrainvoice-tls
+  Usages:
+    digital signature
+    key encipherment
+Status:
+  Conditions:
+    Last Transition Time:        2025-11-19T11:37:07Z
+    Message:                     Issuing certificate as Secret does not exist
+    Observed Generation:         1
+    Reason:                      DoesNotExist
+    Status:                      True
+    Type:                        Issuing
+    Last Transition Time:        2025-11-19T11:37:07Z
+    Message:                     Issuing certificate as Secret does not exist
+    Observed Generation:         1
+    Reason:                      DoesNotExist
+    Status:                      False
+    Type:                        Ready
+  Next Private Key Secret Name:  vostrainvoice-tls-g7d9m
+Events:                          <none>
+NAME                                       STATE     DOMAIN                  AGE
+vostrainvoice-tls-1-562842374-1670352422   pending   vostrainvoice.com       86m
+vostrainvoice-tls-1-562842374-2711227199   valid     vostrainvoice.se        86m
+vostrainvoice-tls-1-562842374-3016172507   valid     www.vostrainvoice.se    86m
+vostrainvoice-tls-1-562842374-4257089306   pending   www.vostrainvoice.com   86m
 root@vostra-server:~# 
