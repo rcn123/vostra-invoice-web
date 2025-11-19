@@ -1,0 +1,233 @@
+/* =========================
+   Bas: färger & typografi
+   ========================= */
+:root {
+    --violet-primary: #6C5CE7;
+    --violet-primary-dark: #5248BA;
+    --bg-page: #F6F6F7;
+    --bg-card: #FFFFFF;
+    --border-subtle: #E4E4E7;
+    --text-strong: #1E1E1E;
+    --text-normal: #333333;
+    --text-muted: #555555;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-normal);
+}
+
+/* Centrerad max-bredd för innehållet */
+.demo-container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 32px 16px 48px;
+}
+
+/* =========================
+   Header / Intro
+   ========================= */
+.demo-header {
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    padding: 24px 24px 20px;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    margin-bottom: 24px;
+}
+
+.demo-header h1 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-strong);
+}
+
+.demo-header p {
+    margin: 0 0 4px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.demo-header-separator {
+    margin-top: 16px;
+    height: 2px;
+    width: 80px;
+    border-radius: 999px;
+    background: var(--violet-primary);
+}
+
+/* =========================
+   Dashboard grid / kort
+   ========================= */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+}
+
+/* För sektioner med två större kort */
+.dashboard-grid-wide {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+}
+
+/* Standardkort */
+.card {
+    background-color: var(--bg-card);
+    border-radius: 16px;
+    border: 1px solid var(--border-subtle);
+    padding: 20px 20px 18px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Titelrad i kort */
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-strong);
+}
+
+.card-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* Ikon-rundel (monokrom lila) */
+.card-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(108, 92, 231, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--violet-primary);
+    font-size: 16px; /* om du kör med textikoner / emojis */
+}
+
+/* Stor siffra i kort */
+.card-metric-main {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text-strong);
+}
+
+.card-metric-secondary {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* Lista med stats i ett kort */
+.card-list {
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    color: var(--text-normal);
+}
+
+.card-list li {
+    margin-bottom: 3px;
+}
+
+/* =========================
+   Progress / barer
+   ========================= */
+
+.progress-wrapper {
+    margin-top: 8px;
+}
+
+.progress-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background-color: #E5E5EB;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0; /* sätt med style="width: 95%" i HTML */
+    border-radius: 999px;
+    background: var(--violet-primary);
+}
+
+/* =========================
+   Tabeller / listor
+   ========================= */
+
+.table-compact {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+.table-compact th,
+.table-compact td {
+    padding: 4px 0;
+}
+
+.table-compact th {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.table-compact td {
+    color: var(--text-normal);
+}
+
+/* =========================
+   Footer / microtext
+   ========================= */
+
+.demo-footer {
+    margin-top: 32px;
+    font-size: 11px;
+    color: #777777;
+    text-align: left;
+}
+
+/* =========================
+   Responsivitet
+   ========================= */
+
+@media (max-width: 960px) {
+    .dashboard-grid,
+    .dashboard-grid-wide {
+        grid-template-columns: 1fr;
+    }
+
+    .demo-container {
+        padding: 24px 12px 32px;
+    }
+}

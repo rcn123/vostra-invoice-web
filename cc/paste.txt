@@ -1,142 +1,150 @@
-🎨 1. Färgschema (professionellt + modernt + nordiskt)
-Primär: Lila (accent)
+🎨 STE G 1 — Färdigt och komplett design-system
+🎨 Färger
 
-En sofistikerad lila, inte neon, inte pastell:
+Primär (accent lila):
 
-#6C5CE7 (Primary)
-#5248BA (Darkened for text/icons)
+#6C5CE7 (hovers, highlights, bars, ikoner)
 
-Neutralpalett
+#5248BA (dark variant, rubriker/ikoner på mörk bakgrund)
 
-Det här ger en ren enterprise-look:
+Neutrala:
 
-Vit: #FFFFFF
-Ljusgrå: #F6F6F7
-Medium-grå: #E4E4E7
-Mörkgrå för text: #333333
-Sekundär mörk: #1E1E1E (för rubriker/labels)
+Bakgrund ljus: #F6F6F7
 
-Accent (för små detaljer)
+Panelbakgrund vit: #FFFFFF
 
-Mint/blå: #A3E4FF
-Detta ska knappt synas — endast för micro-highlights, typ 3–5% av ytan.
+Kantlinjer: #E4E4E7
 
-🎛️ 2. Layoutprincip – mycket luft, runda hörn, inga hårda boxar
+Text mörk: #1E1E1E
 
-Designkänslan ska vara:
+Text normal: #333333
 
-“Nordic calm + enterprise clarity”
+Text sekundär: #555555
 
-Principer:
+Accent minimal:
 
-Använd 4–6 stora sektioner istället för 12 små kort.
-Dashboarden andas mer.
+#A3E4FF (endast små indikatorer, max 5% av grafiken)
 
-Alla boxar ska ha rounded corners: 12px.
+📝 Typsnitt (enkel, modern, enterprise)
 
-Skugga ska vara ultralåg
-box-shadow: 0px 2px 6px rgba(0,0,0,0.03)
-→ allt känns lätt, inte skrikigt.
+Inter eller Roboto
+(Inter är bättre för tabeller och dashboards)
 
-Inga färgfyllda boxar. Allt ska vara vit/grå med lila ikoner.
+Rubriker:
 
-Rubriker: Semi-bold, mörkgrå. Innehåll: regular, grå.
-
-Ikoner ska vara monokroma (lila primary).
-
-📊 3. Dashboardlayout – exakt rekommenderad struktur
-Sektion: Header (vit bakgrund)
-
-– Rubrik: “Demo — VostraInvoice i praktiken”
-– Text (den vi tog fram nyss) i grå #444
-– En tunn lila linje (#6C5CE7, 2px) under headern
-
-Sektion 1: Översiktsrad (3 breda kort)
-
-Alla med vit bakgrund, subtil kantlinje #EEE.
-
-Kort 1 — Historisk datamängd
-Ikon: lila dokumentstack
-Text: stora siffror + årtal i grå #222
-
-Kort 2 — Status för årets fakturor
-Ikon: lila checkmark
-Progressbar i lila (diskret)
-
-Kort 3 — Regelmotor
-Ikon: lila cog
-3–5 bullets med siffror
-
-Sektion 2: Prestanda & Avvikelser (2 breda kort)
-
-Kort 4 — AI-precision
-Vit bakgrund
-Lila “bar charts”
-Text i #333
-
-Kort 5 — Avvikelselogg
-Vit bakgrund
-Bulletlista med antal
-Använd mörkgrå text
-
-Sektion 3: Leverantörsbredd (small card)
-
-Lila ikon av en “cluster graph”.
-
-🎯 4. Exakt komponentstil
-Kort-stil:
-background: #FFFFFF;
-border: 1px solid #E6E6E8;
-border-radius: 12px;
-padding: 24px;
-
-Rubrik-stil:
-font-family: Inter-Semibold;
-font-size: 18px;
+font-family: Inter-SemiBold;
 color: #1E1E1E;
+letter-spacing: -0.2px;
 
-Siffer-stil:
-font-family: Inter-Bold;
-font-size: 28px;
-color: #333333;
 
-Undertext:
+Brödtext:
+
 font-family: Inter-Regular;
-font-size: 14px;
-color: #555555;
+color: #333333;
+line-height: 1.45;
 
-Ikoner:
 
-Alla i enhetlig färg:
-fill: #6C5CE7; stroke: #6C5CE7;
+Siffror:
 
-🧹 5. Vad du bör ta bort direkt (det som gör sidan “skrikig”)
+font-family: Inter-Bold;
+color: #1E1E1E;
+font-size: 28px;
 
-❌ Pastellfärger
-❌ Överdrivna skuggor
-❌ Gradient panels
-❌ Blandade ikonfärger
-❌ För många små kort
-❌ Färgade bakgrunder
-❌ Mer än en accentfärg
-❌ Staplar i olika färger (alla ska vara lila)
+📏 Spacing & Layout
 
-Minst 50% av problemet du upplever är bara inkonsekvens, inte layouten i sig.
+Använd 8px grid. Alltid multiplar av 8:
 
-🎨 6. “Lila + vit” vs. “Lila + grå”: vilken är bäst?
-Professionell + Modern = Lila + Vit
+Padding i kort: 24px
 
-Det känns som:
-Azure
-Figma
-Notion Enterprise
+Mellanrum mellan kort: 24px
 
-Säker + myndighetsvana = Lila + Ljusgrå
+Rundade hörn: 12px
 
-Det känns som:
-Skatteverket UI
-Kommunala dashboards
-Regionernas intranät
+Box-skugga:
 
-Mitt råd:
-Vit som primär, ljusgrå (#F6F6F7) som bakgrundssektioner, lila som accent.
+0px 2px 6px rgba(0,0,0,0.03)
+
+🧩 STE G 2 — Exakt dashboardlayout i text
+
+Här är layouten du bör ha på https://vostrainvoice.se/demo
+
+(jag skriver den som en design-skiss):
+
+🟣 HERO / Header Section
+
+Rubrik:
+Demo — VostraInvoice i praktiken
+
+Underrubrik (din text, förbättrad):
+
+Demo-datasetet är hämtat från offentlig reskontradata från en större verksamhet och kompletterat med ett mindre antal syntetiska kolumner.
+AI-modellerna och regelmotorn är tränade på samma dataset, och alla visade regler, avvikelser och precisionstal är beräknade direkt från detta underlag.
+Måtten ger en realistisk bild av vilken nivå man typiskt kan förvänta sig vid liknande datamängder, exempelvis omkring en miljon rader historik över två år.
+
+Layout:
+
+Bakgrund: vit
+
+Max-bredd: 1100px centered
+
+En tunn lila linje under sektionen (2px, #6C5CE7)
+
+📊 SEKTION 1 — Översikt (3 breda kort, horisontellt)
+KORT 1 — “Historisk datamängd”
+
+Icon: dokumentstack (lila)
+Stor siffra:
+2023: 487 129
+2024: 545 883
+2025: 453 441 hittills
+Undertext: Beräknat från datasetet i denna demo.
+
+KORT 2 — “2025 — Fakturastatus”
+
+Icon: checkmark (lila)
+95% godkända → lila progressbar
+5% väntar → grå progressbar
+
+KORT 3 — “Regelmotor”
+
+Icon: cog (lila)
+• 102 441 aktiva regler
+• 87 902 automatgenererade
+• 12 331 leverantörsregler
+• 2 208 beloppsintervall
+• 1 213 moms/konto
+• 787 säsongsmönster
+
+Undertext grå:
+Genererat från samma dataset.
+
+📈 SEKTION 2 — AI-prestanda & Avvikelser (2 kort)
+
+KORT 4 — “AI-precision”
+Vit bakgrund
+Lila staplar
+• Konto: 92% / 99%
+• KST: 88% / 97%
+• Projekt: 84% / 96%
+• Moms: 99%
+
+Undertext: Top-1 / top-3.
+
+KORT 5 — “Avvikelser senaste 30 dagarna”
+• 182 dubbletter
+• 41 nya betalningsuppgifter
+• 13 ovanliga konton
+• 6 för stora belopp
+• 1 mönsterförändring
+
+🧮 SEKTION 3 — Leverantörsbredd (1 kort)
+
+Icon: cluster
+• 6 112 unika leverantörer
+• 134 000 rader/månad
+
+🔚 SEKTION 4 — Footer (diskret)
+
+Text i liten grå font (#777):
+
+Filer du laddar upp i denna demo sparas endast under din session och raderas automatiskt när sessionen avslutas. Ladda inte upp dokument som kan innehålla sekretessbelagd information.
