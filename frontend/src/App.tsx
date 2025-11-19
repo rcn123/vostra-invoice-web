@@ -9,7 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 function App() {
   return (
     <ErrorBoundary>
-      <Router basename="/vostra-invoice">
+      <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/demo" element={<DemoPage />} />
