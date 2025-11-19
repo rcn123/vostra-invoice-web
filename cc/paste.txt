@@ -1,17 +1,142 @@
-VostraInvoice
-AI-kontering med människa i loopen
+🎨 1. Färgschema (professionellt + modernt + nordiskt)
+Primär: Lila (accent)
 
-Smidig fakturahantering för kommuner och små organisationer
+En sofistikerad lila, inte neon, inte pastell:
 
-Testa Demo
-Transparens som standard
-Komplett spårbarhet från mottagning till godkännande. Varje steg loggas automatiskt för intern kontroll och revision.
+#6C5CE7 (Primary)
+#5248BA (Darkened for text/icons)
 
-Förklarande AI
-Varje konteringsförslag visas med förklaring och alternativa val. Besluten blir begripliga och granskningsbara.
+Neutralpalett
 
-Människa i loopen
-Användaren har alltid sista ordet. Alla justeringar registreras och förbättrar systemet över tid.
+Det här ger en ren enterprise-look:
 
-Hybrid intelligens
-Kombinerar maskininlärning med redovisnings- och avtalsregler för tillförlitliga resultat.
+Vit: #FFFFFF
+Ljusgrå: #F6F6F7
+Medium-grå: #E4E4E7
+Mörkgrå för text: #333333
+Sekundär mörk: #1E1E1E (för rubriker/labels)
+
+Accent (för små detaljer)
+
+Mint/blå: #A3E4FF
+Detta ska knappt synas — endast för micro-highlights, typ 3–5% av ytan.
+
+🎛️ 2. Layoutprincip – mycket luft, runda hörn, inga hårda boxar
+
+Designkänslan ska vara:
+
+“Nordic calm + enterprise clarity”
+
+Principer:
+
+Använd 4–6 stora sektioner istället för 12 små kort.
+Dashboarden andas mer.
+
+Alla boxar ska ha rounded corners: 12px.
+
+Skugga ska vara ultralåg
+box-shadow: 0px 2px 6px rgba(0,0,0,0.03)
+→ allt känns lätt, inte skrikigt.
+
+Inga färgfyllda boxar. Allt ska vara vit/grå med lila ikoner.
+
+Rubriker: Semi-bold, mörkgrå. Innehåll: regular, grå.
+
+Ikoner ska vara monokroma (lila primary).
+
+📊 3. Dashboardlayout – exakt rekommenderad struktur
+Sektion: Header (vit bakgrund)
+
+– Rubrik: “Demo — VostraInvoice i praktiken”
+– Text (den vi tog fram nyss) i grå #444
+– En tunn lila linje (#6C5CE7, 2px) under headern
+
+Sektion 1: Översiktsrad (3 breda kort)
+
+Alla med vit bakgrund, subtil kantlinje #EEE.
+
+Kort 1 — Historisk datamängd
+Ikon: lila dokumentstack
+Text: stora siffror + årtal i grå #222
+
+Kort 2 — Status för årets fakturor
+Ikon: lila checkmark
+Progressbar i lila (diskret)
+
+Kort 3 — Regelmotor
+Ikon: lila cog
+3–5 bullets med siffror
+
+Sektion 2: Prestanda & Avvikelser (2 breda kort)
+
+Kort 4 — AI-precision
+Vit bakgrund
+Lila “bar charts”
+Text i #333
+
+Kort 5 — Avvikelselogg
+Vit bakgrund
+Bulletlista med antal
+Använd mörkgrå text
+
+Sektion 3: Leverantörsbredd (small card)
+
+Lila ikon av en “cluster graph”.
+
+🎯 4. Exakt komponentstil
+Kort-stil:
+background: #FFFFFF;
+border: 1px solid #E6E6E8;
+border-radius: 12px;
+padding: 24px;
+
+Rubrik-stil:
+font-family: Inter-Semibold;
+font-size: 18px;
+color: #1E1E1E;
+
+Siffer-stil:
+font-family: Inter-Bold;
+font-size: 28px;
+color: #333333;
+
+Undertext:
+font-family: Inter-Regular;
+font-size: 14px;
+color: #555555;
+
+Ikoner:
+
+Alla i enhetlig färg:
+fill: #6C5CE7; stroke: #6C5CE7;
+
+🧹 5. Vad du bör ta bort direkt (det som gör sidan “skrikig”)
+
+❌ Pastellfärger
+❌ Överdrivna skuggor
+❌ Gradient panels
+❌ Blandade ikonfärger
+❌ För många små kort
+❌ Färgade bakgrunder
+❌ Mer än en accentfärg
+❌ Staplar i olika färger (alla ska vara lila)
+
+Minst 50% av problemet du upplever är bara inkonsekvens, inte layouten i sig.
+
+🎨 6. “Lila + vit” vs. “Lila + grå”: vilken är bäst?
+Professionell + Modern = Lila + Vit
+
+Det känns som:
+Azure
+Figma
+Notion Enterprise
+
+Säker + myndighetsvana = Lila + Ljusgrå
+
+Det känns som:
+Skatteverket UI
+Kommunala dashboards
+Regionernas intranät
+
+Mitt råd:
+Vit som primär, ljusgrå (#F6F6F7) som bakgrundssektioner, lila som accent.
