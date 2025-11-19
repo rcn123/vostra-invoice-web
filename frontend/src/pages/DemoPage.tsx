@@ -17,9 +17,6 @@ export default function DemoPage() {
             <h1 className="text-3xl font-semibold text-gray-900 mb-3">
               Demo — VostraInvoice i praktiken
             </h1>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              Data från en exempelregion. Visar hur systemet presterar i praktiken.
-            </p>
             <p className="text-sm text-gray-500 leading-relaxed">
               Demo-datasetet är hämtat från offentlig reskontradata från en större verksamhet och kompletterat med ett mindre antal syntetiska kolumner.
               AI-modellerna och regelmotorn är tränade på samma dataset, och alla visade regler, avvikelser och precisionstal är beräknade direkt från detta underlag.
