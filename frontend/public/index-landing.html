@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VostraInvoice - Automatiserad kontering med AI</title>
+    <meta name="description" content="AI-driven fakturahantering för svenska organisationer. Snabbt, precist och spårbart.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1a202c;
+            background: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: white;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 2rem;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6rem 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            opacity: 0.95;
+            line-height: 1.7;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 5rem 0;
+            background: #f7fafc;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #2d3748;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .feature-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+        }
+
+        .feature-card p {
+            color: #4a5568;
+            line-height: 1.7;
+        }
+
+        /* Stats */
+        .stats {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item h3 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        /* Footer */
+        footer {
+            background: #2d3748;
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        footer p {
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .features h2 {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                margin-top: 1rem;
+            }
+
+            nav a {
+                display: block;
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">VostraInvoice</a>
+                <nav>
+                    <a href="/demo">Demo</a>
+                    <a href="#features">Funktioner</a>
+                    <a href="#kontakt">Kontakt</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Automatiserad kontering med AI</h1>
+            <p>
+                Snabbt, precist och spårbart.<br>
+                VostraInvoice tolkar fakturor, föreslår rätt kontering och ger tydliga förklaringar bakom varje beslut.<br>
+                Mindre manuellt arbete. Färre fel. Bättre kontroll.
+            </p>
+            <a href="/demo" class="cta-button">Testa demo</a>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>85–95%</h3>
+                    <p>Träffsäkerhet (top-1)</p>
+                </div>
+                <div class="stat-item">
+                    <h3>97–99%</h3>
+                    <p>Träffsäkerhet (top-3)</p>
+                </div>
+                <div class="stat-item">
+                    <h3>100%</h3>
+                    <p>Spårbart och transparent</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Varför VostraInvoice?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-number">1</span>
+                    <h3>Hög träffsäkerhet direkt</h3>
+                    <p>
+                        AI-modellen föreslår konto, kostnadsställe, projekt och momskod med hög precision.
+                        Top-1 runt 85–95%, top-3 runt 97–99%.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-number">2</span>
+                    <h3>Full transparens och spårbarhet</h3>
+                    <p>
+                        Varje förslag kommer med sannolikhet, förklaring och historik.
+                        Alla ändringar loggas automatiskt i ett revisionsspår.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-number">3</span>
+                    <h3>Stöd för alla fakturaformat</h3>
+                    <p>
+                        PDF, skannade bilder, Peppol BIS3 och Svefaktura hanteras utan extra arbete.
+                        Systemet läser fakturan som den kommer in.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-number">4</span>
+                    <h3>Automatiska kontroller</h3>
+                    <p>
+                        Onormala belopp, nya betalningsuppgifter, ovanliga konton och dubbletter flaggas automatiskt.
+                        Tidiga varningar ger tryggare fakturaflöden.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-number">5</span>
+                    <h3>Människa-i-loopen — gjort enkelt</h3>
+                    <p>
+                        AI ger förslag. Människan godkänner med ett klick.
+                        Top-3-val, kortkommandon och tydlig layout gör granskningen snabb.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-number">6</span>
+                    <h3>Regelmotor + automatiskt skapade regler</h3>
+                    <p>
+                        Stöd för egna regler som kan overrida AI-modellen.
+                        Stabila mönster i historiska konteringar identifieras automatiskt och blir nya regler som förbättrar precisionen över tid.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-number">7</span>
+                    <h3>Byggt för integrationer</h3>
+                    <p>
+                        API-drivet och flexibelt.
+                        VostraInvoice kan kopplas till befintliga ekonomisystem och arbetsflöden utan att störa vardagen.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="kontakt">
+        <div class="container">
+            <p>&copy; 2025 VostraInvoice. Alla rättigheter förbehållna.</p>
+            <p style="margin-top: 1rem; opacity: 0.7;">Kontakt: info@vostrainvoice.se</p>
+        </div>
+    </footer>
+</body>
+</html>
