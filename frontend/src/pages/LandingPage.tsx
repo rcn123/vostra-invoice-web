@@ -73,6 +73,7 @@ export default function LandingPage() {
               <p className="text-gray-600 leading-relaxed">
                 AI-modellen föreslår konto, kostnadsställe, projekt och momskod med hög precision.
                 Top-1 runt 85–95%, top-3 runt 97–99%.
+                Befintlig historik kan användas för att ge bättre förslag från start.
               </p>
             </div>
 
@@ -120,7 +121,8 @@ export default function LandingPage() {
               <h3 className="text-xl font-semibold mb-3 text-gray-800">Människa-i-loopen — gjort enkelt</h3>
               <p className="text-gray-600 leading-relaxed">
                 AI ger förslag. Människan godkänner med ett klick.
-                Top-3-val, kortkommandon och tydlig layout gör granskningen snabb.
+                Top-3-förslag visas tydligt med sannolikhet och förklaring.
+                Kortkommandon och tydlig layout gör granskningen snabb.
               </p>
             </div>
 
@@ -133,6 +135,7 @@ export default function LandingPage() {
               <p className="text-gray-600 leading-relaxed">
                 Stöd för egna regler som kan overrida AI-modellen.
                 Stabila mönster i historiska konteringar identifieras automatiskt och blir nya regler som förbättrar precisionen över tid.
+                Systemet förbättras över tid när användare godkänner eller justerar förslag.
               </p>
             </div>
 
