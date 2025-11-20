@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from pathlib import Path
 
-from app.database import get_db
+from app.database import get_db, get_ai2_db
 from app.models.invoice import Invoice
 from app.schemas.invoice import InvoiceResponse, InvoiceListResponse, InvoiceApprove
 from app.services.file_service import save_uploaded_file
@@ -125,19 +125,23 @@ async def list_invoices(
     skip: int = 0,
     limit: int = 20,
     status: str = None,
-    db: Session = Depends(get_db)
+    ai2_db: Session = Depends(get_ai2_db)
 ):
     """
-    List invoices with pagination and optional filtering
+    List invoices from AI2 database transactions table (grouped by fakturanr)
 
     Args:
         skip: Number of records to skip (default: 0)
         limit: Maximum number of records to return (default: 20, max: 100)
-        status: Filter by status (optional): uploaded, extracting, extracted, approved, extraction_failed
+        status: Filter by status (not used for ai2 data, kept for API compatibility)
 
     Returns:
         InvoiceListResponse with invoices array and total count
     """
+    from sqlalchemy import func, distinct
+    from app.models.transaction import Transaction
+    from app.schemas.invoice import InvoiceResponse
+
     # Validate limit
     if limit > 100:
         raise HTTPException(
@@ -145,24 +149,44 @@ async def list_invoices(
             detail="Limit cannot exceed 100"
         )
 
-    # Build query
-    query = db.query(Invoice)
+    # Get total count of unique invoice numbers
+    total = ai2_db.query(func.count(distinct(Transaction.fakturanr))).scalar()
 
-    # Apply status filter if provided
-    if status:
-        valid_statuses = ["uploaded", "extracting", "extracted", "approved", "extraction_failed"]
-        if status not in valid_statuses:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
-            )
-        query = query.filter(Invoice.status == status)
+    # Query transactions grouped by fakturanr
+    grouped_invoices = ai2_db.query(
+        Transaction.fakturanr,
+        func.min(Transaction.ver_datum).label('first_date'),
+        func.sum(Transaction.belopp).label('total_amount'),
+        func.min(Transaction.f_t).label('supplier_name'),
+        func.count(Transaction.id).label('line_count')
+    ).filter(
+        Transaction.fakturanr.isnot(None)
+    ).group_by(
+        Transaction.fakturanr
+    ).order_by(
+        func.min(Transaction.ver_datum).desc()
+    ).offset(skip).limit(limit).all()
 
-    # Get total count
-    total = query.count()
-
-    # Apply pagination and ordering (newest first)
-    invoices = query.order_by(Invoice.created_at.desc()).offset(skip).limit(limit).all()
+    # Map to InvoiceResponse format
+    invoices = []
+    for inv in grouped_invoices:
+        invoice_data = InvoiceResponse(
+            id=hash(inv.fakturanr) % 2147483647,  # Generate numeric ID from fakturanr
+            created_at=inv.first_date,
+            updated_at=inv.first_date,
+            status="approved",
+            original_filename=f"Faktura {inv.fakturanr}",
+            file_type="historical",
+            raw_ai_data={
+                "invoice_number": inv.fakturanr,
+                "total": inv.total_amount,
+                "supplier": {
+                    "name": inv.supplier_name or "Okänd leverantör"
+                },
+                "line_count": inv.line_count
+            }
+        )
+        invoices.append(invoice_data)
 
     return InvoiceListResponse(
         invoices=invoices,

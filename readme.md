@@ -1,5 +1,7 @@
 # VostraInvoice Web
 
+**Last Updated:** 2025-11-20 (AI2 Database Integration)
+
 Public marketing website and demo for VostraInvoice - AI-powered invoice processing for Swedish municipalities and organizations.
 
 **Live at:** https://vostrainvoice.se/ (primary), https://vostrainvoice.com/ (secondary)
@@ -161,54 +163,42 @@ vostra-invoice-web/
 
 ## Local Development
 
-### Backend Development
+### Local Development (One Command)
 
-**Phase 1 (vostra-api) - Complete ✅**
+**✅ RECOMMENDED: Start Everything with Root Docker Compose**
 
-1. Start PostgreSQL: `cd backend && docker-compose -f docker-compose.dev.yml up -d`
-2. Setup environment: `cd backend/api && cp .env.example .env`
-3. Install deps: `pip install -r requirements.txt` (use venv recommended)
-4. Run migrations: `alembic upgrade head`
-5. Start server: `uvicorn app.main:app --reload --port 8000`
-6. API docs: http://localhost:8000/docs
+```bash
+docker-compose up --build
+```
 
-**Phase 2 (vostra-ai-extractor) - Complete ✅**
+This starts the **entire stack** from root directory:
+- **postgres** (vostra-invoice-web) on port 5432
+- **postgres-ai2** (historical data with schema) on port 5433 ✅ **NEW**
+- **ai-extractor** (OpenAI Vision) on port 8001
+- **api** (FastAPI) on port 8000
+- **frontend** (React + Vite) on port 5173 ✅ **NEW**
 
-Features:
-- Modular extractors (GPT-4o via Chat API, GPT-5 via Responses API)
-- PDF support via PyMuPDF (PDF→PNG conversion)
-- Comprehensive Swedish extraction prompt
-- Easy model switching via .env config
+Visit:
+- **Frontend**: http://localhost:5173
+- **API docs**: http://localhost:8000/docs
 
-Quick start:
-1. Setup venv: `cd backend/ai-extractor && python -m venv venv && .\venv\Scripts\Activate.ps1`
-2. Install: `pip install -r requirements.txt` (includes PyMuPDF)
-3. Configure: `cp .env.example .env` (add OPENAI_API_KEY, set OPENAI_MODEL=gpt-4o)
-4. Start: `uvicorn app.main:app --reload --port 8001`
-5. Test: http://localhost:8001/docs (upload PDF invoices directly)
+**What's New (2025-11-20):**
+- **Root docker-compose.yml** orchestrates all services
+- **Frontend in Docker** with hot reload
+- AI2 database with auto-loaded schema
+- Invoice list queries ai2.transactions (GROUP BY fakturanr)
 
-**Phase 3 (Integration) - Next**
+### Alternative: Run Frontend Separately
 
-Connect vostra-api to ai-extractor service.
-
-### Frontend Development
+If you prefer faster hot reload:
 
 ```bash
 cd frontend
 npm install
-
-# Generate TypeScript types from backend OpenAPI spec (requires backend running)
-npm run generate-types
-
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173/`
-
-**Note:**
-- Both local dev and production now run at root path `/`
-- Run `npm run generate-types` manually whenever backend schemas change
-- Types are generated from `http://localhost:8000/openapi.json`
+**Note:** Run `npm run generate-types` manually whenever backend schemas change
 
 ### Routes
 

@@ -1,23 +1,126 @@
-version: '3.8'
+name: vostra-invoice
 
 services:
+  # Database: Main application
+  postgres:
+    image: postgres:15-alpine
+    container_name: vostra-invoice-postgres-dev
+    environment:
+      POSTGRES_DB: vostra-invoice-web
+      POSTGRES_USER: vostra
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vostra -d vostra-invoice-web"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vostra-network
+
+  # Database: AI2 historical data
+  postgres-ai2:
+    image: postgres:15-alpine
+    container_name: vostra-invoice-ai2-postgres-dev
+    environment:
+      POSTGRES_DB: ai2
+      POSTGRES_USER: vostra
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_ai2_data:/var/lib/postgresql/data
+      - ./backend/ai1-db-schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vostra -d ai2"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vostra-network
+
+  # Backend: AI Extractor Service
+  ai-extractor:
+    build:
+      context: ./backend/ai-extractor
+      dockerfile: Dockerfile.dev
+    container_name: vostra-invoice-ai-extractor-dev
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: gpt-4o
+      STORAGE_PATH: /storage/vostra-invoice-web/uploads
+      ENVIRONMENT: development
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend/ai-extractor/app:/app/app
+      - shared_storage:/storage
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    networks:
+      - vostra-network
+
+  # Backend: Main API
+  api:
+    build:
+      context: ./backend/api
+      dockerfile: Dockerfile.dev
+    container_name: vostra-invoice-api-dev
+    environment:
+      DATABASE_URL: postgresql://vostra:dev_password@postgres:5432/vostra-invoice-web
+      AI2_DATABASE_URL: postgresql://vostra:dev_password@postgres-ai2:5432/ai2
+      AI_EXTRACTOR_URL: http://ai-extractor:8001
+      STORAGE_PATH: /storage/vostra-invoice-web/uploads
+      ENVIRONMENT: development
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/api/app:/app/app
+      - ./backend/api/alembic:/app/alembic
+      - shared_storage:/storage
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      postgres-ai2:
+        condition: service_healthy
+      ai-extractor:
+        condition: service_started
+    networks:
+      - vostra-network
+
+  # Frontend: React Application
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
+    container_name: vostra-invoice-frontend-dev
     ports:
-      - "80:80"
-    restart: unless-stopped
-    container_name: vostra-frontend
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js
+      - ./frontend/postcss.config.js:/app/postcss.config.js
+    depends_on:
+      - api
+    networks:
+      - vostra-network
 
-  # Backend placeholder - uncomment when FastAPI is ready
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8000:8000"
-  #   restart: unless-stopped
-  #   container_name: vostra-backend
-  #   environment:
-  #     - DATABASE_URL=${DATABASE_URL}
+volumes:
+  postgres_data:
+    driver: local
+  postgres_ai2_data:
+    driver: local
+  shared_storage:
+    driver: local
+
+networks:
+  vostra-network:
+    driver: bridge

@@ -1,13 +1,13 @@
 # Claude Code Session Guide
 
-**Last Updated:** 2025-11-19 (Domain Migration to vostrainvoice.se)
+**Last Updated:** 2025-11-20 (AI2 Database Integration)
 **Project:** VostraInvoice - AI-powered invoice processing for Swedish municipalities
 
 ---
 
 ## Current Status
 
-### ✅ Completed (as of 2025-11-16)
+### ✅ Completed (as of 2025-11-20)
 
 1. **Frontend Application - Connected to Real API** ✅ (React + TypeScript + Tailwind)
    - Full TypeScript conversion completed
@@ -38,11 +38,24 @@
    - **Secondary domain**: https://vostrainvoice.com/ (for future global expansion)
    - **Legacy domain**: https://vostra.ai/vostra-invoice/ (kept for transition period)
 
-3. **Mock Data System**
+3. **Mock Data System** (deprecated - now using real ai2 data)
    - 3 realistic Swedish invoices in `frontend/src/data/mockInvoices.ts`
    - Follows ground-truth-schema.json structure
    - AI suggestions with confidence scores and XAI data
    - Line items with BAS accounting codes
+
+3b. **AI2 Database Integration** ✅ **NEW as of 2025-11-20**
+   - PostgreSQL database with historical transaction data
+   - **Production**: Deployed on Kubernetes (postgres-ai2 service)
+   - **Local dev**: Included in docker-compose.dev.yml with schema auto-load
+   - **Schema file**: `backend/ai1-db-schema.sql` (exported from production)
+   - **Key tables**:
+     - `transactions`: fakturanr, belopp, ver_datum, f (supplier#), f_t (supplier name), konto, kst, projekt
+     - `suppliers`: lev_nr, namn, org_nr
+     - `konto_definitions`: Account definitions
+   - **Invoice list migration**: GET /api/invoices now queries ai2.transactions with GROUP BY fakturanr
+   - **Dual database setup**: Main app DB + AI2 DB (separate engines/sessions)
+   - **Local setup**: `docker-compose -f docker-compose.dev.yml up` (postgres-ai2 on port 5433)
 
 4. **Backend Phase 1: vostra-api** ✅
    - **Directory structure**: `backend/api/` with organized modules
@@ -249,13 +262,16 @@ User approves with corrections → Final data saved → Ready for export
 
 ### Backend (Implemented)
 - **FastAPI** (Python 3.11) ✅
-- **PostgreSQL 15** with JSONB fields ✅
+- **PostgreSQL 15** with dual database setup ✅
+  - `vostra-invoice-web` - Main app database (upload workflow)
+  - `ai2` - Historical transaction data ✅ **NEW**
+  - Separate SQLAlchemy engines and sessions
 - **SQLAlchemy** + Alembic migrations (timestamptz) ✅
 - **OpenAI Vision API** (GPT-4o / GPT-5) ✅
 - **PyMuPDF** for PDF→PNG conversion ✅
 - **Modular extractors** for easy model swapping ✅
-- **Virtual environments** (venv) for isolation ✅
-- **Kubernetes** deployment - Phase 6 (planned)
+- **Docker Compose** with all services (postgres, postgres-ai2, api, ai-extractor) ✅
+- **Kubernetes** deployment ✅
 
 ---
 
@@ -426,6 +442,22 @@ When resuming work across sessions:
 ---
 
 ## Common Tasks
+
+### Start Everything (One Command) ✅ **RECOMMENDED**
+```bash
+docker-compose up --build
+```
+
+This starts the entire stack from root directory:
+- **postgres** (vostra-invoice-web) on port 5432
+- **postgres-ai2** (historical data with schema) on port 5433
+- **ai-extractor** on port 8001
+- **api** on port 8000
+- **frontend** on port 5173
+
+Visit:
+- **Frontend**: http://localhost:5173
+- **API docs**: http://localhost:8000/docs
 
 ### Test Frontend Locally
 ```bash

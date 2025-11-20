@@ -31,7 +31,7 @@ services:
       - "5433:5432"
     volumes:
       - postgres_ai2_data:/var/lib/postgresql/data
-      - ./data:/imports
+      - ./ai1-db-schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U vostra -d ai2"]
       interval: 10s
@@ -66,6 +66,7 @@ services:
     container_name: vostra-invoice-api-dev
     environment:
       DATABASE_URL: postgresql://vostra:dev_password@postgres:5432/vostra-invoice-web
+      AI2_DATABASE_URL: postgresql://vostra:dev_password@postgres-ai2:5432/ai2
       AI_EXTRACTOR_URL: http://ai-extractor:8001
       STORAGE_PATH: /storage/vostra-invoice-web/uploads
       ENVIRONMENT: development
@@ -80,6 +81,8 @@ services:
              uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     depends_on:
       postgres:
+        condition: service_healthy
+      postgres-ai2:
         condition: service_healthy
       ai-extractor:
         condition: service_started
