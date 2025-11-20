@@ -74,6 +74,8 @@ jobs:
             # Apply Kubernetes manifests (in case they changed)
             kubectl apply -f k8s/postgres-deployment.yaml
             kubectl apply -f k8s/postgres-service.yaml
+            kubectl apply -f k8s/postgres-ai2-deployment.yaml
+            kubectl apply -f k8s/postgres-ai2-service.yaml
             kubectl apply -f k8s/ai-extractor-deployment.yaml
             kubectl apply -f k8s/ai-extractor-service.yaml
             kubectl apply -f k8s/api-deployment.yaml
@@ -86,6 +88,7 @@ jobs:
 
             # Wait for postgres to be ready before restarting other services
             kubectl rollout status deployment/postgres -n vostra-invoice-web --timeout=180s
+            kubectl rollout status deployment/postgres-ai2 -n vostra-invoice-web --timeout=180s
 
             # Restart deployments to use new images
             kubectl rollout restart deployment/vostra-ai-extractor -n vostra-invoice-web

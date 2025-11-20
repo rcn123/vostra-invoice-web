@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-ai2
+  namespace: vostra-invoice-web
+  labels:
+    app: postgres-ai2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-ai2
+  template:
+    metadata:
+      labels:
+        app: postgres-ai2
+    spec:
+      containers:
+      - name: postgres-ai2
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          value: "ai2"
+        - name: POSTGRES_USER
+          value: "vostra"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: postgres-password
+        volumeMounts:
+        - name: postgres-ai2-storage
+          mountPath: /var/lib/postgresql/data
+        - name: import-data
+          mountPath: /imports
+          readOnly: true
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "300m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - vostra
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - vostra
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: postgres-ai2-storage
+        persistentVolumeClaim:
+          claimName: postgres-ai2-pvc
+      - name: import-data
+        hostPath:
+          path: /var/www/vostra-invoice-web/backend/data
+          type: Directory
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-ai2-pvc
+  namespace: vostra-invoice-web
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

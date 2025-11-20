@@ -45,6 +45,7 @@ Thumbs.db
 # Database
 *.db
 *.sqlite3
+backend/data/
 
 # Storage (uploaded files)
 storage/
