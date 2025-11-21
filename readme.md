@@ -1,6 +1,6 @@
 # VostraInvoice Web
 
-**Last Updated:** 2025-11-20 (AI2 Database Integration)
+**Last Updated:** 2025-11-21 (AI2 Database Fully Operational - 639K Invoices Live)
 
 Public marketing website and demo for VostraInvoice - AI-powered invoice processing for Swedish municipalities and organizations.
 
@@ -24,12 +24,14 @@ Public marketing website and demo for VostraInvoice - AI-powered invoice process
 
 - **Backend API**: FastAPI + PostgreSQL ✅ Live at https://vostra.ai/api
   - POST /api/invoices/upload - Upload & AI extract invoices
-  - GET /api/invoices - List with pagination & status filtering (queries ai2 database)
+  - GET /api/invoices - List with pagination & status filtering
   - GET /api/invoices/{id} - Retrieve single invoice
   - POST /api/invoices/{id}/approve - User approval workflow
   - DELETE /api/invoices/{id} - Dev cleanup (marked unsafe for prod)
   - GET /api/health - DB + AI connectivity checks
-  - **Dual Database**: vostra-invoice-web (uploads) + ai2 (historical transactions)
+  - **Dual Database**:
+    - vostra-invoice-web (uploads workflow)
+    - ai2 (historical transactions: **956K rows → 639K unique invoices**) ✅ **LIVE**
 
 - **AI Extraction**: OpenAI GPT-4o Vision ✅ Working in production
   - Modular architecture for easy model swapping
