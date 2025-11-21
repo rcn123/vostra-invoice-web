@@ -50,6 +50,8 @@ spec:
             - pg_isready
             - -U
             - vostra
+            - -d
+            - ai2
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
@@ -58,6 +60,8 @@ spec:
             - pg_isready
             - -U
             - vostra
+            - -d
+            - ai2
           initialDelaySeconds: 5
           periodSeconds: 5
       volumes:
