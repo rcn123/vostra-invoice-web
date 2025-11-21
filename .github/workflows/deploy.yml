@@ -54,6 +54,7 @@ jobs:
               -e "s|\${DB_PASSWORD_B64}|${DB_PASSWORD_B64}|g" \
               -e "s|\${OPENAI_API_KEY_B64}|${OPENAI_API_KEY_B64}|g" \
               -e "s|\${DATABASE_URL_B64}|${DATABASE_URL_B64}|g" \
+              -e "s|\${AI2_DATABASE_URL_B64}|${AI2_DATABASE_URL_B64}|g" \
               k8s/backend-secrets.yaml.tpl \
               | kubectl apply -f - || { echo "ERROR: Failed to create backend secrets!"; exit 1; }
 
