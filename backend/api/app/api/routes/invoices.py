@@ -177,6 +177,7 @@ async def list_invoices(
             status="approved",
             original_filename=f"Faktura {inv.fakturanr}",
             file_type="historical",
+            file_path="",  # AI2 transactions don't have file paths
             raw_ai_data={
                 "invoice_number": inv.fakturanr,
                 "total": inv.total_amount,
