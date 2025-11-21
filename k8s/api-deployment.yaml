@@ -28,6 +28,8 @@ spec:
             secretKeyRef:
               name: backend-secrets
               key: database-url
+        - name: AI2_DATABASE_URL
+          value: "postgresql://vostra:dev_password@postgres-ai2:5432/ai2"
         - name: AI_EXTRACTOR_URL
           value: "http://vostra-ai-extractor:8001"
         - name: STORAGE_PATH
