@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "postgresql://vostra:dev_password@localhost:5432/vostra-invoice-web"
 
-    # AI2 Database (historical data - production postgres-ai2)
+    # AI2 Database (historical data)
     AI2_DATABASE_URL: str = "postgresql://vostra:dev_password@localhost:5433/ai2"
 
     # AI Extractor Service

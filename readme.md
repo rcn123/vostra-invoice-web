@@ -24,11 +24,12 @@ Public marketing website and demo for VostraInvoice - AI-powered invoice process
 
 - **Backend API**: FastAPI + PostgreSQL ✅ Live at https://vostra.ai/api
   - POST /api/invoices/upload - Upload & AI extract invoices
-  - GET /api/invoices - List with pagination & status filtering
+  - GET /api/invoices - List with pagination & status filtering (queries ai2 database)
   - GET /api/invoices/{id} - Retrieve single invoice
   - POST /api/invoices/{id}/approve - User approval workflow
   - DELETE /api/invoices/{id} - Dev cleanup (marked unsafe for prod)
   - GET /api/health - DB + AI connectivity checks
+  - **Dual Database**: vostra-invoice-web (uploads) + ai2 (historical transactions)
 
 - **AI Extraction**: OpenAI GPT-4o Vision ✅ Working in production
   - Modular architecture for easy model swapping
@@ -116,7 +117,9 @@ vostra-invoice-web/
 │   │   │   ├── services/        # Modular extractors (GPT-4o, GPT-5)
 │   │   │   └── utils/           # PDF converter, file loaders
 │   │   └── requirements.txt     # Includes PyMuPDF
-│   └── docker-compose.dev.yml   # Local PostgreSQL
+│   └── data/                     # Database files
+│       ├── ai2_export_postgresql.sql  # Production AI2 data export ✅ NEW
+│       └── ai1-db-schema.sql    # AI2 schema reference
 ├── landing/                       # Root landing page ✅ LIVE
 │   ├── index.html
 │   ├── nginx.conf
@@ -139,6 +142,8 @@ vostra-invoice-web/
 │   └── core-rules.md             # Development principles
 ├── .github/workflows/             # GitHub Actions CI/CD ✅ WORKING
 │   └── deploy.yml                # Auto-deploy on push to main
+├── docker-compose.yml             # Root compose (all services) ✅ NEW
+├── .env                           # Environment variables (OPENAI_API_KEY only)
 ├── claude.md                      # Session guide for Claude Code
 ├── README.md                      # This file
 └── core-rules.md                  # Fail fast, no overengineering, Swedish text
@@ -163,30 +168,43 @@ vostra-invoice-web/
 
 ## Local Development
 
-### Local Development (One Command)
-
 **✅ RECOMMENDED: Start Everything with Root Docker Compose**
 
+**Prerequisites:**
+1. Docker Desktop installed and running
+
+**Setup (First Time):**
+
+1. **Create `.env` file in root directory:**
 ```bash
-docker-compose up --build
+# VostraInvoice Development Environment
+
+# OpenAI API Key (required for AI extraction)
+OPENAI_API_KEY=sk-your-key-here
 ```
 
-This starts the **entire stack** from root directory:
-- **postgres** (vostra-invoice-web) on port 5432
-- **postgres-ai2** (historical data with schema) on port 5433 ✅ **NEW**
-- **ai-extractor** (OpenAI Vision) on port 8001
-- **api** (FastAPI) on port 8000
-- **frontend** (React + Vite) on port 5173 ✅ **NEW**
+2. **Start all services:**
+```bash
+docker compose up
+```
+
+This starts the entire stack:
+- **postgres** (vostra-invoice-web) on port 5432 - Main app database
+- **postgres-ai2** (ai2) on port 5433 - Historical data (auto-imports production data on first start)
+- **ai-extractor** (OpenAI Vision) on port 8001 - AI extraction service
+- **api** (FastAPI) on port 8000 - Backend API
+- **frontend** (React + Vite) on port 5173 - React frontend
 
 Visit:
 - **Frontend**: http://localhost:5173
 - **API docs**: http://localhost:8000/docs
 
 **What's New (2025-11-20):**
-- **Root docker-compose.yml** orchestrates all services
-- **Frontend in Docker** with hot reload
-- AI2 database with auto-loaded schema
-- Invoice list queries ai2.transactions (GROUP BY fakturanr)
+- **Root docker-compose.yml** orchestrates all services in one command
+- **Frontend in Docker** with hot reload (Vite)
+- **Local AI2 database** with production data automatically imported from `backend/data/ai2_export_postgresql.sql`
+- **Simplified setup**: No kubectl port-forward needed, everything runs locally
+- Invoice list queries local ai2.transactions (GROUP BY fakturanr) with real production data
 
 ### Alternative: Run Frontend Separately
 

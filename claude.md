@@ -47,15 +47,16 @@
 3b. **AI2 Database Integration** ✅ **NEW as of 2025-11-20**
    - PostgreSQL database with historical transaction data
    - **Production**: Deployed on Kubernetes (postgres-ai2 service)
-   - **Local dev**: Included in docker-compose.dev.yml with schema auto-load
-   - **Schema file**: `backend/ai1-db-schema.sql` (exported from production)
+   - **Local dev**: postgres-ai2 container with production data imported
+   - **Data import**: `backend/data/ai2_export_postgresql.sql` auto-loads on first start
+   - **Schema**: `backend/ai1-db-schema.sql` (structure reference only)
    - **Key tables**:
      - `transactions`: fakturanr, belopp, ver_datum, f (supplier#), f_t (supplier name), konto, kst, projekt
      - `suppliers`: lev_nr, namn, org_nr
      - `konto_definitions`: Account definitions
    - **Invoice list migration**: GET /api/invoices now queries ai2.transactions with GROUP BY fakturanr
-   - **Dual database setup**: Main app DB + AI2 DB (separate engines/sessions)
-   - **Local setup**: `docker-compose -f docker-compose.dev.yml up` (postgres-ai2 on port 5433)
+   - **Dual database setup**: Main app DB (local) + AI2 DB (local with real data)
+   - **Benefits**: Realistic dev data, works offline, no remote connections needed
 
 4. **Backend Phase 1: vostra-api** ✅
    - **Directory structure**: `backend/api/` with organized modules
@@ -229,11 +230,11 @@ User approves with corrections → Final data saved → Ready for export
 - `backend/api/app/config.py` - Configuration management
 - `backend/api/app/database.py` - SQLAlchemy connection
 - `backend/api/app/models/invoice.py` - Invoice ORM model (timestamptz)
+- `backend/api/app/models/transaction.py` - Transaction ORM model (ai2 database) ✅ **NEW**
 - `backend/api/app/schemas/invoice.py` - Pydantic schemas
 - `backend/api/app/services/file_service.py` - File upload/storage
 - `backend/api/app/utils/validators.py` - File validation
 - `backend/api/alembic/` - Database migrations
-- `backend/docker-compose.dev.yml` - Local PostgreSQL
 
 **vostra-ai-extractor (Phase 2):**
 - `backend/ai-extractor/app/main.py` - FastAPI application
@@ -245,8 +246,11 @@ User approves with corrections → Final data saved → Ready for export
 - `backend/ai-extractor/app/utils/pdf_converter.py` - PDF→PNG converter
 - `backend/ai-extractor/requirements.txt` - Dependencies (incl. PyMuPDF)
 
-### Kubernetes & Deployment
-- `k8s/` - All Kubernetes manifests
+### Docker & Deployment
+- `docker-compose.yml` - **Root compose file** (full stack orchestration) ✅
+- `backend/data/ai2_export_postgresql.sql` - Production AI2 data export ✅ **NEW**
+- `backend/ai1-db-schema.sql` - AI2 schema reference (structure only)
+- `k8s/` - All Kubernetes manifests (production)
 - `.github/workflows/deploy.yml` - CI/CD pipeline
 
 ---
@@ -264,14 +268,16 @@ User approves with corrections → Final data saved → Ready for export
 - **FastAPI** (Python 3.11) ✅
 - **PostgreSQL 15** with dual database setup ✅
   - `vostra-invoice-web` - Main app database (upload workflow)
-  - `ai2` - Historical transaction data ✅ **NEW**
+  - `ai2` - Historical transaction data with production data imported ✅ **NEW**
   - Separate SQLAlchemy engines and sessions
+  - Both databases run locally in Docker containers
+  - AI2 auto-imports from `backend/data/ai2_export_postgresql.sql` on first start
 - **SQLAlchemy** + Alembic migrations (timestamptz) ✅
 - **OpenAI Vision API** (GPT-4o / GPT-5) ✅
 - **PyMuPDF** for PDF→PNG conversion ✅
 - **Modular extractors** for easy model swapping ✅
-- **Docker Compose** with all services (postgres, postgres-ai2, api, ai-extractor) ✅
-- **Kubernetes** deployment ✅
+- **Docker Compose** orchestrates all services (single root docker-compose.yml) ✅
+- **Kubernetes** deployment (production) ✅
 
 ---
 
@@ -288,10 +294,11 @@ User approves with corrections → Final data saved → Ready for export
 
 ## Current Demo Features
 
-### Invoice List Page
-- Grid view of 3 mock invoices
-- Status indicators (Granskas, Godkänd)
-- Supplier, amount, date columns
+### Invoice List Page ✅ **CONNECTED TO AI2 DATABASE**
+- Real data from ai2 transactions table (GROUP BY fakturanr)
+- Displays aggregated invoice totals
+- Supplier names, amounts, dates from production data
+- Pagination support
 - Links to detail pages
 
 ### Invoice Detail Page
@@ -313,7 +320,7 @@ User approves with corrections → Final data saved → Ready for export
 ### Upload Page
 - Drag-and-drop file upload UI
 - File validation (PDF, PNG, XML)
-- Currently simulated (no backend yet)
+- Real backend integration with AI extraction
 
 ---
 
@@ -343,6 +350,7 @@ See **`cc/invoice-upload-implementation-plan.md`** for complete roadmap.
 
 ### ✅ Phase 4: Additional API Endpoints (Complete)
 - ✅ GET /api/invoices - List with pagination and status filtering
+- ✅ **AI2 Integration**: GET /api/invoices now queries ai2.transactions (GROUP BY fakturanr)
 - ✅ GET /api/invoices/{id} - Single invoice retrieval
 - ✅ POST /api/invoices/{id}/approve - User approval workflow
 - ✅ Enhanced GET /api/health - DB and AI extractor connectivity
@@ -385,6 +393,8 @@ See **`cc/invoice-upload-implementation-plan.md`** for complete roadmap.
 ✅ **Complete CRUD API** (upload, get, list, approve)
 ✅ **Enhanced health checks** (DB + AI connectivity)
 ✅ **Status flow validation** (extraction_failed handling)
+✅ **AI2 Database Integration** (local with production data import) ✅ **NEW as of 2025-11-20**
+✅ **Invoice list from ai2.transactions** (GROUP BY fakturanr with aggregated totals)
 
 ### What Still Needs Implementation (Phase 6 - Production Hardening)
 ❌ DELETE endpoint access control (currently dev-only in comments, not enforced)
@@ -444,20 +454,30 @@ When resuming work across sessions:
 ## Common Tasks
 
 ### Start Everything (One Command) ✅ **RECOMMENDED**
+
+**Prerequisites:**
+1. Ensure `.env` file exists in root with:
 ```bash
-docker-compose up --build
+OPENAI_API_KEY=sk-your-key-here
+```
+
+2. Start all services:
+```bash
+docker compose up
 ```
 
 This starts the entire stack from root directory:
-- **postgres** (vostra-invoice-web) on port 5432
-- **postgres-ai2** (historical data with schema) on port 5433
-- **ai-extractor** on port 8001
-- **api** on port 8000
-- **frontend** on port 5173
+- **postgres** (vostra-invoice-web) on port 5432 - Main app database
+- **postgres-ai2** (ai2) on port 5433 - Historical data (auto-imports production data on first start)
+- **ai-extractor** on port 8001 - AI extraction service
+- **api** on port 8000 - Backend API
+- **frontend** on port 5173 - React frontend
 
 Visit:
 - **Frontend**: http://localhost:5173
 - **API docs**: http://localhost:8000/docs
+
+**Note:** AI2 database automatically imports production data from `backend/data/ai2_export_postgresql.sql` on first container start. This only happens once; subsequent starts use the persisted volume data.
 
 ### Test Frontend Locally
 ```bash
@@ -474,7 +494,7 @@ npm run dev
 ### Generate TypeScript Types from Backend
 ```bash
 # Start backend first
-cd backend && docker-compose -f docker-compose.dev.yml up
+docker compose up
 
 # In another terminal, generate types
 cd frontend
@@ -519,10 +539,11 @@ git push origin main
 - Easy to evolve over time
 - Can add normalized tables later if needed
 
-### Why Mock Data First?
-- Test UX before backend complexity
-- Iterate on frontend independently
-- Clear API contract before implementation
+### Why Dual Database Setup?
+- **vostra-invoice-web**: New upload workflow, AI extraction, user approvals
+- **ai2**: Historical data showcase, production transactions for demos
+- Separate concerns, each database optimized for its purpose
+- Local dev uses production data dump for realistic testing
 
 ---
 
